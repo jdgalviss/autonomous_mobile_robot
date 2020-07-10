@@ -2,3 +2,11 @@
 .catkin_workspace
 catkin_ws/build
 catkin_ws/devel
+
+dev_ws/build
+dev_ws/install
+dev_ws/log
+
+ros1_bridge_ws/build
+ros1_bridge_ws/install
+ros1_bridge_ws/log
