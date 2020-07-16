@@ -15,15 +15,29 @@ export DOMAIN_ID=0
 ros2 run ros1_bridge dynamic_bridge --bridge-all-1to2-topics
 
 ##Second shell
+ . /usr/local/share/citysim/setup.sh
 . catkin_ws/devel/setup.bash
 roslaunch skid_steer_bot run_world.launch
 
 ##Third shell
 docker ps
 docker exec
-. /dev_ws/install/setup.bash
+cd dev_ws
+. /opt/ros/dashing/setup.bash 
+colcon build
+cd ..
+. dev_ws/install/setup.bash
 export DOMAIN_ID=0
+
 /opt/conda/lib/python3.7
 /opt/conda/lib/python3.7/site-packages
 export PYTHONPATH=$PYTHONPATH:/opt/conda/lib/python3.7:/opt/conda/lib/python3.7/site-packages
 export PYTHONPATH=$PYTHONPATH:/opt/conda/lib/python3.7/site-packages/torch/
+
+
+# Launch Doly
+ . /usr/share/gazebo/setup.sh
+ . /usr/share/gazebo/setup.sh
+ . dev_ws/install/setup.bash
+ ros2 launch dolly_gazebo dolly.launch.py world:=simple_city_orig.world
+
