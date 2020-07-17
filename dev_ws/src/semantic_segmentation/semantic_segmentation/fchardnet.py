@@ -12,7 +12,7 @@ class SemanticSegmentation(object):
         print("Semantic Segmentation using FCHardNet")
         torch.backends.cudnn.benchmark = True
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = self.init_model("pretrained/hardnet70_cityscapes_model.pkl").to(self.device)
+        self.model = self.init_model("/usr/src/app/dev_ws/src/semantic_segmentation/semantic_segmentation/pretrained/hardnet70_cityscapes_model.pkl").to(self.device)
 
 
     def init_model(self, model_path):

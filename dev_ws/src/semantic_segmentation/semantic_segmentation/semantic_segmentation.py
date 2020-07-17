@@ -3,23 +3,27 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from fchardnet import SemanticSegmentation
+import cv2
+import numpy as np
 
 class SemanticSegmentationNode(Node):
     def __init__(self):
         super().__init__('semantic_segmentation')
         # Image subscriber
-        self.image_sub_ = self.create_subscription(Image, 'robot/camera/image_raw', self.image_raw_callback, 10)
+        self.image_sub_ = self.create_subscription(Image, 'camera/image_raw', self.image_raw_callback, 10)
         self.image_sub_  # prevent unused variable warning
-        self.publisher_ = self.create_publisher(Image, 'robot/image_segmented', 10)
+        self.publisher_ = self.create_publisher(Image, 'vision/image_segmented', 10)
         self.bridge = CvBridge()
+        self.seg = SemanticSegmentation()
 
     def image_raw_callback(self, msg):
-        print("receiving raw image")
         self.msg = Image()
         cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
-        #img_decoded = seg.process_img(cv_image,[msg.height,msg.width])
+        cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+        img_decoded = self.seg.process_img(cv_image,[msg.height,msg.width])
+        img_decoded = np.uint8(img_decoded * 255)
         # self.perform_inference(self.detection_model,cv_image)
-        img_msg = self.bridge.cv2_to_imgmsg(cv_image)
+        img_msg = self.bridge.cv2_to_imgmsg(img_decoded)
         self.msg.height = msg.height
         self.msg.width = msg.width
         self.msg.header.stamp = msg.header.stamp

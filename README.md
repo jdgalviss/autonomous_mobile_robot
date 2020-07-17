@@ -4,7 +4,7 @@ docker build . -t amr
 ```
 jupyter lab --ip=0.0.0.0 --port=8888 --allow-root
 
-docker run -p 8888:8888 -v `pwd`/dev_ws/src:/usr/src/app/dev_ws/src -it --rm --gpus all amr 
+docker run -p 8888:8888 -v `pwd`/dev_ws/src/semantic_segmentation:/usr/src/app/dev_ws/src/semantic_segmentation -it --rm --gpus all amr 
 
 ## First shell
 Run docker
@@ -36,8 +36,9 @@ export PYTHONPATH=$PYTHONPATH:/opt/conda/lib/python3.7/site-packages/torch/
 
 
 # Launch Doly
- . /usr/share/gazebo/setup.sh
- . /usr/share/gazebo/setup.sh
- . dev_ws/install/setup.bash
- ros2 launch dolly_gazebo dolly.launch.py world:=simple_city_orig.world
+. /opt/ros/dashing/setup.bash 
+. /usr/share/gazebo/setup.sh
+. /usr/local/share/citysim/setup.sh
+. dev_ws/install/setup.bash
+ros2 launch dolly_gazebo dolly.launch.py world:=simple_city_orig.world
 

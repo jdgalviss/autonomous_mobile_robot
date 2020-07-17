@@ -63,6 +63,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && \
     ros-dashing-ros1-bridge \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ros1_bridge/src /usr/src/app/ros1_bridge/src
+#COPY ros1_bridge/src/semantic_segmentation /usr/src/app/ros1_bridge/src/semantic_segmentation
 
 WORKDIR /usr/src/app/
