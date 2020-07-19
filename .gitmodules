@@ -1,6 +1,3 @@
-[submodule "citysim"]
-	path = citysim
-	url = git@github.com:jdgalviss/citysim.git
 [submodule "catkin_ws/src/skid_steer_bot"]
 	path = catkin_ws/src/skid_steer_bot
 	url = git@github.com:jdgalviss/skid_steer_bot.git
