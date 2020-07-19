@@ -40,5 +40,14 @@ export PYTHONPATH=$PYTHONPATH:/opt/conda/lib/python3.7/site-packages/torch/
 . /usr/share/gazebo/setup.sh
 . /usr/local/share/citysim/setup.sh
 . dev_ws/install/setup.bash
+export DOMAIN_ID=0
 ros2 launch dolly_gazebo dolly.launch.py world:=simple_city_orig.world
 
+# Launch semantic
+cd dev_ws
+. /opt/ros/dashing/setup.bash 
+colcon build
+. install/setup.bash
+export DOMAIN_ID=0
+
+ros2 run semantic_segmentation semantic_segmentation 

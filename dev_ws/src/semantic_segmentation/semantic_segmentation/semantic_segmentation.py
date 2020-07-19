@@ -20,7 +20,10 @@ class SemanticSegmentationNode(Node):
         self.msg = Image()
         cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
         cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
-        img_decoded = self.seg.process_img(cv_image,[msg.height,msg.width])
+        # cv_image = cv2.resize(cv_image,(960,720))
+        h,w,_ = cv_image.shape
+
+        img_decoded = self.seg.process_img(cv_image,[h,w])
         img_decoded = np.uint8(img_decoded * 255)
         # self.perform_inference(self.detection_model,cv_image)
         img_msg = self.bridge.cv2_to_imgmsg(img_decoded)

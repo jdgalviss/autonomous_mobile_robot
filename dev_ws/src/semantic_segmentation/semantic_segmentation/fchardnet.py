@@ -107,7 +107,7 @@ class SemanticSegmentation(object):
         else:
             label_colours = dict(zip(range(19), colors))
                     
-        print('Output shape: ',outputs.shape)
+        # print('Output shape: ',outputs.shape)
         pred = np.squeeze(outputs.data.max(1)[1].cpu().numpy(), axis=0)
         decoded = self.decode_segmap(temp=pred,label_colours=label_colours)
         
