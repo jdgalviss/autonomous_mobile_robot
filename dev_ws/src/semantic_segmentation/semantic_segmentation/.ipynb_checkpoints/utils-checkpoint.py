@@ -1,5 +1,4 @@
 from collections import OrderedDict
-import cv2
 
 def convert_state_dict(state_dict):
     """Converts a state dict saved from a dataParallel module to normal
@@ -11,8 +10,3 @@ def convert_state_dict(state_dict):
         name = k[7:]  # remove `module.`
         new_state_dict[name] = v
     return new_state_dict
-
-def segmented2scan(image, M):
-    print("hello")
-    
-    
