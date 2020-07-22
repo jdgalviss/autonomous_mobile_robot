@@ -112,3 +112,77 @@ class SemanticSegmentation(object):
         decoded = self.decode_segmap(temp=pred,label_colours=label_colours)
         
         return decoded
+
+    def process_img_driveable(self, img, size):
+        #print("Read Input Image from : {}".format(img_path))
+
+        img_resized = cv2.resize(img, (int(size[1]), int(size[0])))  # uint8 with RGB mode
+        img = img_resized.astype(np.float16)
+
+        # norm
+        value_scale = 255
+        mean = [0.406, 0.456, 0.485]
+        mean = [item * value_scale for item in mean]
+        std = [0.225, 0.224, 0.229]
+        std = [item * value_scale for item in std]
+        img = (img - mean) / std
+
+        # NHWC -> NCHW
+        img = img.transpose(2, 0, 1)
+        img = np.expand_dims(img, 0)
+        img = torch.from_numpy(img).float()
+
+        images = img.to(self.device)
+        outputs = self.model(images)
+        colors = [  # [  0,   0,   0],
+            [128, 64, 128],
+            [244, 35, 232],
+            [70, 70, 70],
+            [102, 102, 156],
+            [190, 153, 153],
+            [153, 153, 153],
+            [250, 170, 30],
+            [220, 220, 0],
+            [107, 142, 35],
+            [152, 251, 152],
+            [0, 130, 180],
+            [220, 20, 60],
+            [255, 0, 0],
+            [0, 0, 142],
+            [0, 0, 70],
+            [0, 60, 100],
+            [0, 80, 100],
+            [0, 0, 230],
+            [119, 11, 32],
+        ]
+        colors2 = [  # [  0,   0,   0],
+            [125, 125, 125],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+        
+        label_colours_driveable = dict(zip(range(19), colors2))
+        label_colours = dict(zip(range(19), colors))
+                    
+        # print('Output shape: ',outputs.shape)
+        pred = np.squeeze(outputs.data.max(1)[1].cpu().numpy(), axis=0)
+        decoded = self.decode_segmap(temp=pred,label_colours=label_colours)
+        decoded_driveable = self.decode_segmap(temp=pred,label_colours=label_colours_driveable)
+
+        return decoded, decoded_driveable
