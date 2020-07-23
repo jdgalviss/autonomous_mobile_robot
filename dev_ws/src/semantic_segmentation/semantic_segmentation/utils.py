@@ -2,6 +2,14 @@ from collections import OrderedDict
 import numpy as np
 import cv2
 import math
+HEIGHT = 480
+WIDTH = 480
+PIXEL_PER_METER_X = (WIDTH - 2*100)/2.7 #Horizontal distance between src points in the real world ( I assumed 2.7 meters)
+PIXEL_PER_METER_Y = (HEIGHT - 2*50)/5.4 #Vertical distance between src points in the real world ( I assumed 8 meters)
+angle_range = [-50.0, 50.0]
+angle_increment = 1.0
+max_distance = 7.0
+
 
 def convert_state_dict(state_dict):
     """Converts a state dict saved from a dataParallel module to normal
@@ -23,9 +31,7 @@ def find_nearest_idx(array, value):
     return idx
 
 def segmented2scan(warped_img, warped_center):
-    h,w,_ = warped_img.shape
-    pixel_per_meter_x = (w - 2*100)/2.7 #Horizontal distance between src points in the real world ( I assumed 4 meters)
-    pixel_per_meter_y = (h - 2*100)/8.0 #Vertical distance between src points in the real world ( I assumed 20 meters)
+    warped_center[1] = warped_center[1] + 0.2*PIXEL_PER_METER_Y # Assume 50cm of view deadzone (value to be found with propper extrinsic calibration)
     lower_limit = np.array([50,50,50])
     upper_limit = np.array([200, 200, 200])
     mask = cv2.inRange(np.uint8(warped_img), lower_limit, upper_limit)
@@ -40,8 +46,8 @@ def segmented2scan(warped_img, warped_center):
     scan_angles = []
     for contour in contours:
         for point in contour:
-            distance = math.sqrt(((point[0][0]-warped_center[0])/pixel_per_meter_x)**2 + ((point[0][1]-warped_center[1])/pixel_per_meter_y)**2)
-            angle = -math.atan2((point[0][0] - warped_center[0])/pixel_per_meter_x, (warped_center[1]-point[0][1])/pixel_per_meter_y)
+            distance = math.sqrt(((point[0][0]-warped_center[0])/PIXEL_PER_METER_X)**2 + ((point[0][1]-warped_center[1])/PIXEL_PER_METER_Y)**2)
+            angle = -math.atan2((point[0][0] - warped_center[0])/PIXEL_PER_METER_X, (warped_center[1]-point[0][1])/PIXEL_PER_METER_Y)
             scan_distances.append(distance)
             scan_angles.append(angle)
     
@@ -51,10 +57,7 @@ def segmented2scan(warped_img, warped_center):
     scan_list.sort(key=takeSecond)
     scan_array = np.array(scan_list)
     #Resample data to form scan_data
-    angle_range = [-50.0, 50.0]
-    angle_increment = 0.5
     scan_distances = []
-    max_distance = 15.0
     scan_angles = []
     if scan_array.shape[0]>20:
         for angle in np.arange(angle_range[0], angle_range[1], angle_increment):

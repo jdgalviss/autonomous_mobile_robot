@@ -19,7 +19,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + "/pretrained", ['semantic_segmentation/pretrained/hardnet70_cityscapes_model.pkl']),
-        ('share/' + package_name + "/pretrained", ['semantic_segmentation/Perspective_transform.npz'])
+        ('share/' + package_name + "/pretrained", ['semantic_segmentation/PerspectiveTransform.npz'])
     ],
     install_requires=['setuptools'],
     zip_safe=True,

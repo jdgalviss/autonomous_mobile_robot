@@ -10,6 +10,8 @@ import cv2
 import numpy as np
 import os
 import math
+import time
+
 
 pkg_sem_seg = get_package_share_directory('semantic_segmentation')
 
@@ -28,7 +30,7 @@ class SemanticSegmentationNode(Node):
         self.bridge = CvBridge() # Bridge between opencv and img msgs
         # Load files
         model_path = os.path.join(pkg_sem_seg, 'pretrained', 'hardnet70_cityscapes_model.pkl')
-        transform_mtx_path = os.path.join(pkg_sem_seg, 'pretrained', 'Perspective_transform.npz')
+        transform_mtx_path = os.path.join(pkg_sem_seg, 'pretrained', 'PerspectiveTransform.npz')
         mtxs = np.load(transform_mtx_path)
         self.M = mtxs['M']
         self.M_inv = mtxs['M_inv']
@@ -37,6 +39,7 @@ class SemanticSegmentationNode(Node):
         self.img_size = (480, 480)
 
     def image_raw_callback(self, msg):
+        time1 = time.clock()
         cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
         cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
         # Save a sample image
@@ -88,6 +91,9 @@ class SemanticSegmentationNode(Node):
         self.warp_publisher_.publish(warped_msg)
         if(len(scan_distances) > 50):
             self.scan_publisher_.publish(scan_msg)
+        time2 = time.clock()
+        print(time2-time1)
+        
 
 def main(args = None):
     print('Hi from semantic_segmentation.')
