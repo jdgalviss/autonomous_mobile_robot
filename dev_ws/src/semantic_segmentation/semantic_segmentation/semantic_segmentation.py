@@ -39,7 +39,6 @@ class SemanticSegmentationNode(Node):
         self.img_size = (480, 480)
 
     def image_raw_callback(self, msg):
-        time1 = time.clock()
         cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
         cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
         # Save a sample image
@@ -86,13 +85,10 @@ class SemanticSegmentationNode(Node):
         scan_msg.range_max = 20.0
 
 
-
         self.seg_publisher_.publish(img_msg)
         self.warp_publisher_.publish(warped_msg)
         if(len(scan_distances) > 50):
             self.scan_publisher_.publish(scan_msg)
-        time2 = time.clock()
-        print(time2-time1)
         
 
 def main(args = None):
