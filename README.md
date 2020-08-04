@@ -6,49 +6,91 @@ This is the implementation of an navigation system for an autonomous mobile robo
 3. Scan Transformation: The contour of the driveable area is found and then distances from the camera to the driveable area contour are computed. This allows to generate a vector of distances, that resembles the output of a 2D Lidar (/scan msg type in ROS)
 4. Dynamic Window Approach: DWA is used to compute a motion command (velocity and yaw rate) that keeps the robot inside the driveable areas while avoiding obstacles.
 
+The simulation is implemented in gazebo and uses [dolly](https://github.com/chapulina/dolly) and [citysim](https://github.com/osrf/citysim) forks.
+
 ## Install
 1. Install [ROS 2 dashing](https://index.ros.org/doc/ros2/Installation/Dashing/Linux-Install-Debians/).
 
-2. Install Docker following the instructions on the [link](https://docs.docker.com/engine/install/ubuntu/) and [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) (for gpu support)..
+2. Install Docker following the instructions on the [link](https://docs.docker.com/engine/install/ubuntu/) and [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) (for gpu support). *Semantic segmentation will be run inside docker container, however it could be run on the host with the proper configuration of pytorch*.
 
-3, 
-```bash
-docker build . -t amr
-```
-jupyter lab --ip=0.0.0.0 --port=8888 --allow-root
+3. Clone this repo and its submodules 
+    ```bash
+    git clone --recursive -j8 https://github.com/jdgalviss/autonomous_mobile_robot.git
+    cd autonomous_mobile_robot
+    ```
 
-docker run -p 8888:8888 -v `pwd`/dev_ws/src/semantic_segmentation:/usr/src/app/dev_ws/src/semantic_segmentation -it --rm --gpus all amr 
+4. Build citysim
+    ```bash
+    cd citysim
+    mkdir build
+    cd build
+    cmake ..
+    make install
+    ```
 
-## First shell
-Run docker
-. /opt/ros/dashing/setup.bash
-. /opt/ros/melodic/setup.bash
-export ROS_MASTER_URI=http://192.168.0.189:11311
-export DOMAIN_ID=0
-ros2 run ros1_bridge dynamic_bridge --bridge-all-1to2-topics
+5. Build Dockerfile.
+    ```bash
+    docker build . -t amr
+    ```
 
-##Second shell
- . /usr/local/share/citysim/setup.sh
-. catkin_ws/devel/setup.bash
-roslaunch skid_steer_bot run_world.launch
+6. Build ros workspace
+    ```bash
+    cd dev_ws
+    colcon build
+    ```
+## Run
 
-##Third shell
-docker ps
-docker exec
-cd dev_ws
-. /opt/ros/dashing/setup.bash 
-colcon build
-cd ..
-. dev_ws/install/setup.bash
-export DOMAIN_ID=0
+### Test Semantic Segmentation and calculate perspective transformation matrix
 
-/opt/conda/lib/python3.7
-/opt/conda/lib/python3.7/site-packages
-export PYTHONPATH=$PYTHONPATH:/opt/conda/lib/python3.7:/opt/conda/lib/python3.7/site-packages
-export PYTHONPATH=$PYTHONPATH:/opt/conda/lib/python3.7/site-packages/torch/
+1. Run docker container and jupyterlab
+    ```bash
+    docker run -p 8888:8888 -v `pwd`/dev_ws/src/semantic_segmentation:/usr/src/app/dev_ws/src/semantic_segmentation -it --rm --gpus all amr 
+    jupyter lab --ip=0.0.0.0 --port=8888 --allow-root
+    ```
+
+2. Follow the instructions in the Jupytenotebook located inside the container in: */usr/src/app/dev_ws/src/semantic_segmentation/semantic_segmentation/warp_scan_segmentation.ipynb*
+
+### Run Simulation
+1. On a new terminal run the simulation:
+    ```bash
+    cd dev_ws
+    . /opt/ros/dashing/setup.bash 
+    . /usr/share/gazebo/setup.sh
+    . /usr/local/share/citysim/setup.sh
+    . install/setup.bash
+    export DOMAIN_ID=0
+    ros2 launch dolly_gazebo dolly.launch.py world:=simple_city_orig.world
+    ```
+2. In another terminal, run docker container
+    ```bash
+    cd autonomous_mobile_robot
+    docker run -p 8888:8888 -v `pwd`/dev_ws/src/semantic_segmentation:/usr/src/app/dev_ws/src/semantic_segmentation -it --rm --gpus all amr 
+    ```
+3. Run semantic segmentaton inside docker container
+    ```bash
+    cd dev_ws
+    . /opt/ros/dashing/setup.bash 
+    colcon build
+    . install/setup.bash
+    export DOMAIN_ID=0
+    ros2 run semantic_segmentation semantic_segmentation 
+    ```
+4. In a new terminal run dwa_planner
+    ```bash
+    cd autonomous_mobile_robot
+    . install/setup.bash
+    ros2 run dwa_planner dwa_planner 
+    ```
+5. In a new terminal run the node that generates the waypoint of the path to be followed
+    ```bash
+    cd autonomous_mobile_robot
+    . install/setup.bash
+    ros2 run dwa_planner trajectory_publisher 
+    ```
 
 
-# Launch Doly
+
+<!-- # Launch Doly
 cd dev_ws
 . /opt/ros/dashing/setup.bash 
 . /usr/share/gazebo/setup.sh
@@ -64,4 +106,4 @@ colcon build
 . install/setup.bash
 export DOMAIN_ID=0
 
-ros2 run semantic_segmentation semantic_segmentation 
+ros2 run semantic_segmentation semantic_segmentation  -->

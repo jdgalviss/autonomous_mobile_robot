@@ -28,18 +28,18 @@ using Control = std::array<float, 2>;
 /*! Configuration class with the parameters of the algorithm */
 class Config{
 public:
-  float max_speed = 0.45;
+  float max_speed = 0.4;
   float min_speed = -0.2;
   float max_yawrate = 60.0 * PI / 180.0;
   float max_accel = 0.3;
   float robot_radius = 0.45;
-  float max_dyawrate = 40.0 * PI / 180.0;
+  float max_dyawrate = 60.0 * PI / 180.0;
 
   float v_reso = 0.01;
   float yawrate_reso = 0.1 * PI / 180.0;
 
   float dt = 0.1;
-  float predict_time = 4.0;
+  float predict_time = 3.5;
   float to_goal_cost_gain = 0.75;
   float speed_cost_gain = 1.5;
 };
