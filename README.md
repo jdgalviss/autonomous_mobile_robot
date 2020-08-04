@@ -88,7 +88,8 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
     ros2 run dwa_planner trajectory_publisher 
     ```
 
-
+## Results
+![alt text](imgs/results.gif "Title")
 
 <!-- # Launch Doly
 cd dev_ws
