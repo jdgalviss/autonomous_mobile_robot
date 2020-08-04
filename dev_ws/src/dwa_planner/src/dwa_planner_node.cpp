@@ -8,10 +8,13 @@
 #include "dwa_planner/dwa_planner.h"
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <nav_msgs/msg/path.hpp>
 
 #include <geometry_msgs/msg/twist.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/bool.hpp"
+
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -35,9 +38,12 @@ class DWAPlannerNode : public rclcpp::Node
 
       // Publishers
       cmd_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("dolly/cmd_vel", 10);
+      goal_reached_publisher_ = this->create_publisher<std_msgs::msg::Bool>("planner/goal_reached", 10);
+      path_publisher_ = this->create_publisher<nav_msgs::msg::Path>("planner/path", 10);
+
       timer_ = this->create_wall_timer(
       100ms, std::bind(&DWAPlannerNode::TimerCallback, this));
-      State init_state({{-39.0f, 5.0f, 0.0f , 0.0f, 0.0f}});
+      State init_state({{-39.1f, 5.1f, 0.0f , 0.0f, 0.0f}});
       dwa_planner_ = new DWAPlanner(init_state);
     }
 
@@ -84,6 +90,44 @@ class DWAPlannerNode : public rclcpp::Node
       control_msg.linear.x = control[0];
       control_msg.angular.z = control[1];
       cmd_publisher_->publish(control_msg);
+
+      //Check if goal was reached
+      if(!is_goal_reached && dwa_planner_->IsGoalReached()){
+        auto goal_reached_msg = std_msgs::msg::Bool();
+        goal_reached_msg.data = dwa_planner_->IsGoalReached();
+        goal_reached_publisher_->publish(goal_reached_msg);
+        RCLCPP_INFO(this->get_logger(), "Goal Reached");
+      } 
+      is_goal_reached = dwa_planner_->IsGoalReached();
+
+      //Publish trajectory
+      Trajectory traj = dwa_planner_->GetTrajectory();
+      auto path_msg = nav_msgs::msg::Path();
+      path_msg.header.frame_id = "odom_demo";
+      path_msg.header.stamp = rclcpp::Clock().now();
+      int skip_n = 4;
+      std::vector<geometry_msgs::msg::PoseStamped> path;
+      // std::cout<<traj.size()<<std::endl;
+      for (unsigned int i = 0; i < traj.size(); i += skip_n)
+      {
+        float x = traj[i][0];
+        float y = traj[i][1];
+        auto pose = geometry_msgs::msg::PoseStamped();
+        pose.header.stamp = rclcpp::Clock().now();
+
+        // pose.header.frame_id = "odom_demo";
+
+        pose.pose.position.x = x;
+        pose.pose.position.y = y;
+        pose.pose.orientation.w = 1.0;
+        pose.pose.position.z = 5.2;
+
+
+        path.push_back(pose);
+      }
+      path_msg.poses = path;
+      path_publisher_->publish(path_msg);
+
       //control_msg.header.stamp = this->get_clock();
 
       // publisher_->publish(message);
@@ -94,8 +138,13 @@ class DWAPlannerNode : public rclcpp::Node
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr goal_subscriber_;
 
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr goal_reached_publisher_;
+    rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_publisher_;
+
+
     DWAPlanner * dwa_planner_;
     size_t count_;
+    bool is_goal_reached = false;
   };
 
   int main(int argc, char * argv[])

@@ -33,7 +33,7 @@ public:
   float yawrate_reso = 0.1 * PI / 180.0;
 
   float dt = 0.1;
-  float predict_time = 3.0;
+  float predict_time = 4.0;
   float to_goal_cost_gain = 0.75;
   float speed_cost_gain = 1.5;
 };
@@ -44,18 +44,18 @@ class DWAPlanner{
         void SetObstacles(std::vector<float> scan_distances, float angle_increment, float angle_min, float angle_max, float range_min, float range_max);
         void SetState(State state);
         void SetGoal(Point goal);
-
+        bool IsGoalReached();
+        Trajectory GetTrajectory();
         Control GetCmd();
 
     private:
         State Motion(State x, Control u, float dt);
-        Window CalcDynamicWindow(State x);
-        Trajectory CalcTrajectory(State x, float v, float y);
-        float CalcObstacleCost(Trajectory traj, Obstacle ob);
-        float CalcToGoalCost(Trajectory traj, Point goal);
-        Trajectory CalcFinalInput( State x, Control& u, Window dw, Point goal,
-                                                std::vector<std::array<float, 2>>ob);
-        Trajectory DWAControl(State x, Control & u, Point goal, Obstacle ob);
+        Window CalcDynamicWindow();
+        Trajectory CalcTrajectory(float v, float y);
+        float CalcObstacleCost(Trajectory traj);
+        float CalcToGoalCost(Trajectory traj);
+        Trajectory CalcFinalInput(Window dw);
+        Trajectory DWAControl();
         
 
         State x_;
@@ -68,5 +68,6 @@ class DWAPlanner{
         Trajectory trajectory_;
         int count_ = 0;
         Config config_;
+        bool goal_reached_ = false;
 
 };
