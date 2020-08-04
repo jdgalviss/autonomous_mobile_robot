@@ -1,4 +1,17 @@
 # autonomous_mobile_robot
+This is the implementation of an navigation system for an autonomous mobile robot based on:
+
+1. Semantic Segmentation: From a front facing camera obects in the image are segmented and driveable areas identified.
+2. Perspective Transform: A transformation matrix allows to transform the segmented image to a birdview perspective.
+3. Scan Transformation: The contour of the driveable area is found and then distances from the camera to the driveable area contour are computed. This allows to generate a vector of distances, that resembles the output of a 2D Lidar (/scan msg type in ROS)
+4. Dynamic Window Approach: DWA is used to compute a motion command (velocity and yaw rate) that keeps the robot inside the driveable areas while avoiding obstacles.
+
+## Install
+1. Install [ROS 2 dashing](https://index.ros.org/doc/ros2/Installation/Dashing/Linux-Install-Debians/).
+
+2. Install Docker following the instructions on the [link](https://docs.docker.com/engine/install/ubuntu/) and [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) (for gpu support)..
+
+3, 
 ```bash
 docker build . -t amr
 ```

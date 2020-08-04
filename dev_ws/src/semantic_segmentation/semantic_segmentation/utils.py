@@ -69,6 +69,5 @@ def segmented2scan(warped_img, warped_center):
             else:
                 scan_distances.append(0.0)
     return scan_distances, angle_increment*math.pi/180.0
-    #print("hello")
     
     

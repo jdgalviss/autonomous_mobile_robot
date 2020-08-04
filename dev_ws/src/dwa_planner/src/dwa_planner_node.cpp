@@ -1,3 +1,9 @@
+/*! \file dwa_planner_node.cpp
+ *  \brief Node implementing the DWAPlanner class for obstacle
+ * avoidance in ROS2
+ *  By: Juan David Galvis
+ *  https://github.com/jdgalviss
+ */
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -9,16 +15,15 @@
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <nav_msgs/msg/path.hpp>
-
 #include <geometry_msgs/msg/twist.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include "std_msgs/msg/string.hpp"
 #include "std_msgs/msg/bool.hpp"
 
-
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
+/*! DWAPlannerNode class */
 class DWAPlannerNode : public rclcpp::Node
 {
   public:
@@ -26,7 +31,6 @@ class DWAPlannerNode : public rclcpp::Node
     : Node("dwa_planner_node"), count_(0)
     {
       // Subscribers
-
       scan_subscriber_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
       "vision/image_segmented/scan", 10, std::bind(&DWAPlannerNode::ScanCallback, this, _1));
 
@@ -41,6 +45,7 @@ class DWAPlannerNode : public rclcpp::Node
       goal_reached_publisher_ = this->create_publisher<std_msgs::msg::Bool>("planner/goal_reached", 10);
       path_publisher_ = this->create_publisher<nav_msgs::msg::Path>("planner/path", 10);
 
+      // Timer used to estimate cmd velocities according to DWA
       timer_ = this->create_wall_timer(
       100ms, std::bind(&DWAPlannerNode::TimerCallback, this));
       State init_state({{-39.1f, 5.1f, 0.0f , 0.0f, 0.0f}});
@@ -48,12 +53,11 @@ class DWAPlannerNode : public rclcpp::Node
     }
 
   private:
-
+    
     void ScanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg) const
     {
       std::vector<float> scan_distances = msg->ranges;
       dwa_planner_->SetObstacles(scan_distances, msg->angle_increment, msg->angle_min, msg->angle_max, msg->range_min, msg->range_max);
-
     }
 
     void OdomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) const
@@ -71,8 +75,8 @@ class DWAPlannerNode : public rclcpp::Node
       m.getRPY(roll, pitch, yaw);
       float vx = msg->twist.twist.linear.x;
       float omega = msg->twist.twist.angular.z;
-
       State state({{x, y, (float)yaw, vx, omega}});
+      // Update state with odom msg
       dwa_planner_->SetState(state);
     }
 
@@ -82,16 +86,16 @@ class DWAPlannerNode : public rclcpp::Node
       dwa_planner_->SetGoal(goal);
     }
 
-
     void TimerCallback()
     {
+      // Get cmd from dwa planner and publish
       auto control_msg = geometry_msgs::msg::Twist();
       Control control = dwa_planner_->GetCmd();
       control_msg.linear.x = control[0];
       control_msg.angular.z = control[1];
       cmd_publisher_->publish(control_msg);
 
-      //Check if goal was reached
+      //Check if goal was reached and publish
       if(!is_goal_reached && dwa_planner_->IsGoalReached()){
         auto goal_reached_msg = std_msgs::msg::Bool();
         goal_reached_msg.data = dwa_planner_->IsGoalReached();
@@ -107,7 +111,6 @@ class DWAPlannerNode : public rclcpp::Node
       path_msg.header.stamp = rclcpp::Clock().now();
       int skip_n = 4;
       std::vector<geometry_msgs::msg::PoseStamped> path;
-      // std::cout<<traj.size()<<std::endl;
       for (unsigned int i = 0; i < traj.size(); i += skip_n)
       {
         float x = traj[i][0];
@@ -140,8 +143,6 @@ class DWAPlannerNode : public rclcpp::Node
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_publisher_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr goal_reached_publisher_;
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_publisher_;
-
-
     DWAPlanner * dwa_planner_;
     size_t count_;
     bool is_goal_reached = false;

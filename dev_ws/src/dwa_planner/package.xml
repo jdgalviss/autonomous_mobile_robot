@@ -3,7 +3,7 @@
 <package format="3">
   <name>dwa_planner</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Dynamic Window Approach for obstacle avoidance</description>
   <maintainer email="jdgalviss@gmail.com">jdgalviss</maintainer>
   <license>TODO: License declaration</license>
 
