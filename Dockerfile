@@ -19,6 +19,7 @@ COPY requirements.txt .
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get install -y python3-setuptools \
     python3-pip \
+    && pip3 install --upgrade pip \
     && pip3 install -r requirements.txt \
     && apt-get -y clean all \
     && rm -rf /var/lib/apt/lists/*
