@@ -45,7 +45,7 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
 1. Run docker container and jupyterlab
     ```bash
     docker run -p 8888:8888 -v `pwd`/dev_ws/src/semantic_segmentation:/usr/src/app/dev_ws/src/semantic_segmentation -it --rm --gpus all amr 
-    jupyter lab --ip=0.0.0.0 --port=8888 --allow-root
+    jupyter lab --ip=0.0.0.0 --port=8888 --allow-root --no-browser
     ```
 
 2. Follow the instructions in the Jupytenotebook located inside the container in: */usr/src/app/dev_ws/src/semantic_segmentation/semantic_segmentation/warp_scan_segmentation.ipynb*
