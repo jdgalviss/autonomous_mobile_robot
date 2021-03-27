@@ -37,13 +37,13 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && \
     apt install -y gnupg2 \
     lsb-release \
     && rm -rf /var/lib/apt/lists/*
-RUN echo "Installing ros dashing" 
+RUN echo "Installing ros eloquent" 
 RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 RUN /bin/bash -c 'echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
 RUN apt update && \
-    apt install -y ros-dashing-desktop\
+    apt install -y ros-eloquent-desktop\
     && rm -rf /var/lib/apt/lists/*
-RUN /bin/bash -c "source /opt/ros/dashing/setup.bash"
+RUN /bin/bash -c "source /opt/ros/eloquent/setup.bash"
 RUN DEBIAN_FRONTEND=noninteractive apt update && \
     apt install -y python3-argcomplete \
     python3-rosdep \
@@ -61,7 +61,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && \
     libeigen3-dev \
     ros-melodic-catkin \
     python-catkin-tools \
-    ros-dashing-ros1-bridge \
+    ros-eloquent-ros1-bridge \
     && rm -rf /var/lib/apt/lists/*
 
 #COPY ros1_bridge/src/semantic_segmentation /usr/src/app/ros1_bridge/src/semantic_segmentation
