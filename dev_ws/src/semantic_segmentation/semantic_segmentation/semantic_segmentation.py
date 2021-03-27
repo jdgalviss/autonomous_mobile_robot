@@ -18,6 +18,8 @@ pkg_sem_seg = get_package_share_directory('semantic_segmentation')
 class SemanticSegmentationNode(Node):
     def __init__(self):
         super().__init__('semantic_segmentation')
+        print("holi")
+
         # Image subscriber
         self.image_sub_ = self.create_subscription(Image, 'camera/image_raw', self.image_raw_callback, 10)
         self.image_sub_  # prevent unused variable warning
@@ -62,22 +64,21 @@ class SemanticSegmentationNode(Node):
         # publish topics
         warped_msg = Image()
         warped_msg = self.bridge.cv2_to_imgmsg(warped)
-        warped_msg.header.stamp = msg.header.stamp
+        warped_msg.header.frame_id = 'chassis'
+        warped_msg.header.stamp = self.get_clock().now().to_msg()
         warped_msg.encoding = msg.encoding
         
         seg_img = Image()
-        img_msg = self.bridge.cv2_to_imgmsg(img_decoded)
-        seg_img.header.stamp = msg.header.stamp
+        seg_img = self.bridge.cv2_to_imgmsg(img_decoded)
+        seg_img.header.frame_id = 'chassis'
+        seg_img.header.stamp = self.get_clock().now().to_msg()
         seg_img.encoding = msg.encoding
 
         scan_msg = LaserScan()
-
         scan_msg.ranges = scan_distances
         scan_msg.intensities = [0.0]*len(scan_distances)
-
-        scan_msg.header.stamp = msg.header.stamp
+        scan_msg.header.stamp = self.get_clock().now().to_msg()
         scan_msg.header.frame_id = 'chassis'
-
         scan_msg.angle_increment = angle_increment
         scan_msg.angle_max = 50*math.pi/180.0
         scan_msg.angle_min = -50*math.pi/180.0
@@ -85,11 +86,10 @@ class SemanticSegmentationNode(Node):
         scan_msg.range_max = 20.0
 
 
-        self.seg_publisher_.publish(img_msg)
+        self.seg_publisher_.publish(seg_img)
         self.warp_publisher_.publish(warped_msg)
         if(len(scan_distances) > 50):
             self.scan_publisher_.publish(scan_msg)
-        
 
 def main(args = None):
     print('Hi from semantic_segmentation.')

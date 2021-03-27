@@ -9,7 +9,7 @@ This is the implementation of an navigation system for an autonomous mobile robo
 The simulation is implemented in gazebo and uses [dolly](https://github.com/chapulina/dolly) and [citysim](https://github.com/osrf/citysim) forks.
 
 ## Install
-1. Install [ROS 2 dashing](https://index.ros.org/doc/ros2/Installation/Dashing/Linux-Install-Debians/).
+1. Install [ROS 2 eloquent](https://index.ros.org/doc/ros2/Installation/Eloquent/Linux-Install-Debians/).
 
 2. Install Docker following the instructions on the [link](https://docs.docker.com/engine/install/ubuntu/) and [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) (for gpu support). *Semantic segmentation will be run inside docker container, however it could be run on the host with the proper configuration of pytorch*.
 
@@ -45,7 +45,7 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
 1. Run docker container and jupyterlab
     ```bash
     docker run -p 8888:8888 -v `pwd`/dev_ws/src/semantic_segmentation:/usr/src/app/dev_ws/src/semantic_segmentation -it --rm --gpus all amr 
-    jupyter lab --ip=0.0.0.0 --port=8888 --allow-root
+    jupyter lab --ip=0.0.0.0 --port=8888 --allow-root --no-browser
     ```
 
 2. Follow the instructions in the Jupytenotebook located inside the container in: */usr/src/app/dev_ws/src/semantic_segmentation/semantic_segmentation/warp_scan_segmentation.ipynb*
@@ -54,10 +54,9 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
 1. On a new terminal run the simulation:
     ```bash
     cd dev_ws
-    . /opt/ros/dashing/setup.bash 
-    . /usr/share/gazebo/setup.sh
-    . /usr/local/share/citysim/setup.sh
+    . /opt/ros/eloquent/setup.bash 
     . install/setup.bash
+    . /usr/local/share/citysim/setup.sh
     export DOMAIN_ID=0
     ros2 launch dolly_gazebo dolly.launch.py world:=simple_city_orig.world
     ```
@@ -69,11 +68,11 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
 3. Run semantic segmentaton inside docker container
     ```bash
     cd dev_ws
-    . /opt/ros/dashing/setup.bash 
+    . /opt/ros/eloquent/setup.bash 
     colcon build
     . install/setup.bash
     export DOMAIN_ID=0
-    ros2 run semantic_segmentation semantic_segmentation 
+    run semantic_segmentation semantic_segmentation --ros-args --param use_sim_time:=true
     ```
 4. In a new terminal run dwa_planner
     ```bash
@@ -93,7 +92,7 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
 
 <!-- # Launch Doly
 cd dev_ws
-. /opt/ros/dashing/setup.bash 
+. /opt/ros/eloquent/setup.bash 
 . /usr/share/gazebo/setup.sh
 . /usr/local/share/citysim/setup.sh
 . install/setup.bash
@@ -102,7 +101,7 @@ ros2 launch dolly_gazebo dolly.launch.py world:=simple_city_orig.world
 
 # Launch semantic
 cd dev_ws
-. /opt/ros/dashing/setup.bash 
+. /opt/ros/eloquent/setup.bash 
 colcon build
 . install/setup.bash
 export DOMAIN_ID=0
