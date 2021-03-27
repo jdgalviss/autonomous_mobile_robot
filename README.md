@@ -72,7 +72,7 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
     colcon build
     . install/setup.bash
     export DOMAIN_ID=0
-    run semantic_segmentation semantic_segmentation --ros-args --param use_sim_time:=true
+    ros2 run semantic_segmentation semantic_segmentation --ros-args --param use_sim_time:=true
     ```
 4. In a new terminal run dwa_planner
     ```bash
