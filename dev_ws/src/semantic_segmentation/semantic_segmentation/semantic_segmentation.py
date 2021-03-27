@@ -18,8 +18,6 @@ pkg_sem_seg = get_package_share_directory('semantic_segmentation')
 class SemanticSegmentationNode(Node):
     def __init__(self):
         super().__init__('semantic_segmentation')
-        print("holi")
-
         # Image subscriber
         self.image_sub_ = self.create_subscription(Image, 'camera/image_raw', self.image_raw_callback, 10)
         self.image_sub_  # prevent unused variable warning

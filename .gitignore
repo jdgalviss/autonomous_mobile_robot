@@ -2,7 +2,7 @@
 .catkin_workspace
 catkin_ws/build
 catkin_ws/devel
-
+*__pycache*
 dev_ws/build
 dev_ws/install
 dev_ws/log*
