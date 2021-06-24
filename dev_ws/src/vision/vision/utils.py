@@ -30,17 +30,17 @@ def find_nearest_idx(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-def segmented2scan(warped_img, warped_center):
-    warped_center[1] = warped_center[1] + 0.2*PIXEL_PER_METER_Y # Assume 50cm of view deadzone (value to be found with propper extrinsic calibration)
+def warped2scan(warped_img, warped_center):
+    warped_center[1] = warped_center[1] + 0.2*PIXEL_PER_METER_Y # Assume view deadzone (value to be found with propper extrinsic calibration)
     lower_limit = np.array([50,50,50])
     upper_limit = np.array([200, 200, 200])
     mask = cv2.inRange(np.uint8(warped_img), lower_limit, upper_limit)
-
+	
     contours, hierarchy = cv2.findContours(mask*200,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    #contours_warped = warped_img.copy()
-    for contour in contours:
-        cv2.drawContours(warped_img, contour, -1, (0, 255, 0), 3)
-
+    contours_warped = warped_img.copy()
+    #for contour in contours:
+    #    cv2.drawContours(warped_img, contour, -1, (255, 0, 0), 6)
+    
     # Detect distances and angles to points in contour
     scan_distances = []
     scan_angles = []
@@ -48,6 +48,8 @@ def segmented2scan(warped_img, warped_center):
         for point in contour:
             distance = math.sqrt(((point[0][0]-warped_center[0])/PIXEL_PER_METER_X)**2 + ((point[0][1]-warped_center[1])/PIXEL_PER_METER_Y)**2)
             angle = -math.atan2((point[0][0] - warped_center[0])/PIXEL_PER_METER_X, (warped_center[1]-point[0][1])/PIXEL_PER_METER_Y)
+            if(angle<angle_range[1]*math.pi/180 and angle>angle_range[0]*math.pi/180):
+                cv2.circle(contours_warped, (point[0][0], point[0][1]),int(3+distance*5),(255,0,0), -1)
             scan_distances.append(distance)
             scan_angles.append(angle)
     
@@ -68,6 +70,6 @@ def segmented2scan(warped_img, warped_center):
                 scan_distances.append(scan_array[idx,0])
             else:
                 scan_distances.append(0.0)
-    return scan_distances, angle_increment*math.pi/180.0
+    return scan_distances, angle_increment*math.pi/180.0, contours_warped
     
     

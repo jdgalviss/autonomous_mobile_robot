@@ -3,12 +3,12 @@ import torch
 from utils import convert_state_dict
 import cv2
 import numpy as np
-sys.path.append("/usr/src/app/dev_ws/src/semantic_segmentation/semantic_segmentation")
+sys.path.append("/usr/src/app/dev_ws/src/vision/vision")
 from models import get_model
 
 
 class SemanticSegmentation(object):
-    def __init__(self, model_path="/usr/src/app/dev_ws/src/semantic_segmentation/semantic_segmentation/pretrained/hardnet70_cityscapes_model.pkl"):
+    def __init__(self, model_path="/usr/src/app/dev_ws/src/vision/vision/pretrained/hardnet70_cityscapes_model.pkl"):
         print("Semantic Segmentation using FCHardNet")
         torch.backends.cudnn.benchmark = True
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -156,7 +156,7 @@ class SemanticSegmentation(object):
             [119, 11, 32],
         ]
         colors2 = [  # [  0,   0,   0],
-            [125, 125, 125],
+            [55, 195, 55],
             [0, 0, 0],
             [0, 0, 0],
             [0, 0, 0],
@@ -169,7 +169,7 @@ class SemanticSegmentation(object):
             [0, 0, 0],
             [0, 0, 0],
             [0, 0, 0],
-            [125, 125, 125],
+            [55, 195, 55],
             [0, 0, 0],
             [0, 0, 0],
             [0, 0, 0],
@@ -185,4 +185,4 @@ class SemanticSegmentation(object):
         decoded = self.decode_segmap(temp=pred,label_colours=label_colours)
         decoded_driveable = self.decode_segmap(temp=pred,label_colours=label_colours_driveable)
 
-        return decoded, decoded_driveable
+        return np.uint8(decoded*255), np.uint8(decoded_driveable*255)
