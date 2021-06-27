@@ -2,6 +2,8 @@ from setuptools import setup
 
 package_name = 'vision'
 models = 'vision/models'
+# utils = 'vision/utils'
+
 
 setup(
     name=package_name,
@@ -12,7 +14,9 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + "/pretrained", ['vision/pretrained/hardnet70_cityscapes_model.pkl']),
-        ('share/' + package_name + "/pretrained", ['vision/PerspectiveTransform.npz'])
+        ('share/' + package_name + "/pretrained", ['vision/pretrained/yolov5s.pt']),
+        ('share/' + package_name + "/pretrained", ['vision/PerspectiveTransform.npz']),
+
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -22,7 +26,8 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     scripts=["vision/segmentation.py", 
-                "vision/utils.py"],
+            "vision/object_detection.py", 
+                "vision/helpers.py"],
     entry_points={
         'console_scripts': [
             'vision_node = vision.vision_node:main'

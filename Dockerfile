@@ -73,4 +73,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 
 #COPY ros1_bridge/src/semantic_segmentation /usr/src/app/ros1_bridge/src/semantic_segmentation
 COPY dev_ws/semantic_segmentation.sh /usr/src/app/dev_ws/
+COPY requirements.txt /usr/src/app/
+WORKDIR /usr/src/app
+RUN pip3 install -r requirements.txt
 WORKDIR /usr/src/app/dev_ws

@@ -1,6 +1,6 @@
 import sys
 import torch
-from utils import convert_state_dict
+from helpers import convert_state_dict
 import cv2
 import numpy as np
 sys.path.append("/usr/src/app/dev_ws/src/vision/vision")
