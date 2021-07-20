@@ -7,16 +7,13 @@ from utils.general import check_img_size, check_requirements, check_imshow, colo
     apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path, save_one_box
 from utils.plots import colors, plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized
-from ament_index_python.packages import get_package_share_directory
-pkg_vision = get_package_share_directory('vision')
 import os
 import sys
 sys.path.append("/usr/src/app/dev_ws/src/vision/vision")
 
 class ObjectDetector(object):
-    def __init__(self):
+    def __init__(self, model_path):
         print('Loading Object Detection')
-        model_path = os.path.join(pkg_vision, 'pretrained', 'yolov5s.pt')
         self.model = attempt_load(model_path, map_location='cuda')  # load FP32 model
         self.colors = [(255,0,0),(0,255,0),(0,0,255), (255,255,255)]
         self.img_size = 640

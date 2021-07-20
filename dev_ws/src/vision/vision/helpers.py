@@ -2,11 +2,14 @@ from collections import OrderedDict
 import numpy as np
 import cv2
 import math
+import matplotlib.pyplot as plt
+import os
+
 HEIGHT = 480
 WIDTH = 480
-PIXEL_PER_METER_X = (WIDTH - 2*100)/2.7 #Horizontal distance between src points in the real world ( I assumed 2.7 meters)
-PIXEL_PER_METER_Y = (HEIGHT - 2*50)/5.4 #Vertical distance between src points in the real world ( I assumed 8 meters)
-angle_range = [-45.0, 45.0]
+PIXEL_PER_METER_X = (WIDTH - 2*150)/3.0 #Horizontal distance between src points in the real world ( I assumed 2.7 meters)
+PIXEL_PER_METER_Y = (HEIGHT - 30-60)/8.0 #Vertical distance between src points in the real world ( I assumed 8 meters)
+angle_range = [-40.0, 40.0]
 angle_increment = 1.0
 max_distance = 7.0
 
@@ -30,6 +33,13 @@ def find_nearest_idx(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
+def warp_driveable(warped_img, warped_center):
+    warped_center[1] = warped_center[1] + 0.2*PIXEL_PER_METER_Y # Assume view deadzone (value to be found with propper extrinsic calibration)
+    lower_limit = np.array([50,50,50])
+    upper_limit = np.array([200, 200, 200])
+    mask = cv2.inRange(np.uint8(warped_img), lower_limit, upper_limit)
+    return mask
+
 def warped2scan(warped_img, warped_center):
     warped_center[1] = warped_center[1] + 0.2*PIXEL_PER_METER_Y # Assume view deadzone (value to be found with propper extrinsic calibration)
     lower_limit = np.array([50,50,50])
@@ -49,7 +59,7 @@ def warped2scan(warped_img, warped_center):
             distance = math.sqrt(((point[0][0]-warped_center[0])/PIXEL_PER_METER_X)**2 + ((point[0][1]-warped_center[1])/PIXEL_PER_METER_Y)**2)
             angle = -math.atan2((point[0][0] - warped_center[0])/PIXEL_PER_METER_X, (warped_center[1]-point[0][1])/PIXEL_PER_METER_Y)
             if(angle<angle_range[1]*math.pi/180.0 and angle>angle_range[0]*math.pi/180.0):
-                cv2.circle(contours_warped, (point[0][0], point[0][1]),int(2.0+distance*4.0),(255,0,0), -1)
+                cv2.circle(contours_warped, (point[0][0], point[0][1]),int(1.0+distance*3.0),(255,0,0), -1)
             scan_distances.append(distance)
             scan_angles.append(angle)
     
@@ -72,4 +82,97 @@ def warped2scan(warped_img, warped_center):
                 scan_distances.append(0.0)
     return scan_distances, angle_increment*math.pi/180.0, contours_warped
     
+def get_driveable_mask(warped, warped_center):
+    warped_center[1] = warped_center[1] + 0.2*PIXEL_PER_METER_Y # Assume view deadzone (value to be found with propper extrinsic calibration)
+    # Calculate driveable area mask
+    lower_limit = np.array([50,50,50])
+    upper_limit = np.array([200, 200, 200])
+    driveable_mask = cv2.inRange(np.uint8(warped), lower_limit, upper_limit)
+
+    # Find contours corresponding to driveable area limits
+    contours, hierarchy = cv2.findContours(driveable_mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours_mask = np.zeros(driveable_mask.shape)
+    contours_mask2 = np.zeros(driveable_mask.shape)
     
+    #for contour in contours:
+    cv2.drawContours(contours_mask2, contours, -1, (255, 255, 255), 3)
+
+    for contour in contours:
+        for point in contour:
+            distance = math.sqrt(((point[0][0]-warped_center[0])/PIXEL_PER_METER_X)**2 + ((point[0][1]-warped_center[1])/PIXEL_PER_METER_Y)**2)
+            angle = -math.atan2((point[0][0] - warped_center[0])/PIXEL_PER_METER_X, (warped_center[1]-point[0][1])/PIXEL_PER_METER_Y)
+            if(angle<angle_range[1]*math.pi/180.0 and angle>angle_range[0]*math.pi/180.0):
+                cv2.circle(contours_mask, (point[0][0], point[0][1]),20,15, -1)
+                scan_distances.append(distance)
+                scan_angles.append(angle)
+            else:
+                cv2.circle(contours_mask2, (point[0][0], point[0][1]),6,0, -1)
+    contours_mask2[:3,:] = 0
+    contours_mask2[-2:,:] = 0
+    
+#                 contours_mask[point[0][1], point[0][0]] = 255
+    return contours_mask2
+
+def get_driveable_mask2(warped, warped_center):
+    warped_center[1] = warped_center[1] + 0.1*PIXEL_PER_METER_Y # Assume view deadzone (value to be found with propper extrinsic calibration)
+    # Calculate driveable area mask
+    lower_limit = np.array([50,50,50])
+    upper_limit = np.array([200, 200, 200])
+    driveable_mask = cv2.inRange(np.uint8(warped), lower_limit, upper_limit)
+
+    # Find contours corresponding to driveable area limits
+    contours, hierarchy = cv2.findContours(driveable_mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours_mask = np.zeros(driveable_mask.shape)
+
+    # Detect distances and angles to points in contour
+    scan_points = []
+    scan_distances = []
+    scan_angles = []
+    for contour in contours:
+        for point in contour:
+            distance = math.sqrt(((point[0][0]-warped_center[0])/PIXEL_PER_METER_X)**2 + ((point[0][1]-warped_center[1])/PIXEL_PER_METER_Y)**2)
+            angle = -math.atan2((point[0][0] - warped_center[0])/PIXEL_PER_METER_X, (warped_center[1]-point[0][1])/PIXEL_PER_METER_Y)
+            if(angle<angle_range[1]*math.pi/180.0 and angle>angle_range[0]*math.pi/180.0):
+                scan_points.append(np.array([point[0][0], point[0][1]]))
+                scan_distances.append(distance)
+                scan_angles.append(angle)
+           
+    points_definitive = []   
+    scan_array = np.array(([scan_distances, scan_angles, scan_points])).T
+    
+    scan_list = list(scan_array)
+    scan_list.sort(key=takeSecond)
+    scan_array = np.array(scan_list)
+    prev_angle = 10000
+    angle_thresh = 0.1*math.pi/180.0
+    min_d = 1000
+    for scan in scan_array:
+        d = scan[0]
+        angle = scan[1]
+        point = scan[2]
+         
+        if(abs(angle-prev_angle)<angle_thresh):
+            if(d<min_d):
+                points_definitive[-1]=point
+                min_d = d
+        else:
+            points_definitive.append(point)
+            min_d = d
+        prev_angle = angle
+    for p in points_definitive:
+        cv2.circle(contours_mask, (p[0], p[1]),8,255, -1)
+        
+    return contours_mask
+
+
+def load_images_from_folder(folder):
+    images = []
+    filenames = []
+    for filename in os.listdir(folder):
+        img = cv2.imread(os.path.join(folder,filename))
+        #print(os.path.join(folder,filename))
+        if img is not None:
+            images.append(img)
+            filenames.append(filename)
+            
+    return images, filenames

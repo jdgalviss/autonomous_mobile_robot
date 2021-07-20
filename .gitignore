@@ -1,4 +1,5 @@
 *.vscode*
+*.ipynb_checkpoints*
 .catkin_workspace
 catkin_ws/build
 catkin_ws/devel
@@ -12,3 +13,8 @@ dev_ws/src/log*
 ros1_bridge_ws/build
 ros1_bridge_ws/install
 ros1_bridge_ws/log
+
+dev_ws/src/vision/vision/output/
+
+dev_ws/src/vision/vision/bkup/
+dev_ws/src/vision/vision/data/

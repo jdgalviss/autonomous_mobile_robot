@@ -1,7 +1,7 @@
 #opencv-python
-#jupyter
-#jupyterlab
-#matplotlib
+jupyter
+jupyterlab
+matplotlib
 
 # pip install -r requirements.txt
 
