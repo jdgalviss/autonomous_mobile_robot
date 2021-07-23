@@ -27,7 +27,7 @@ class NavigationSystem(object):
         driveable_decoded, driveable_mask, preds, driveable_mask_with_objects = self.perception_.process_frame(img)
         cost,cost_obst = self.costmap_.calculate_costmap(driveable_mask, preds, driveable_mask_with_objects)
         path, path_img = self.planner_.calculate_path(cost)
-        # print(path)
+
         # Transform path to global frame
         if robot_state is not None:
             path = self.transform_path(path, robot_state)
