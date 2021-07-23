@@ -23,7 +23,6 @@ class NavigationSystem(object):
         print(path.shape)
         return path
 
-
     def path_planning(self, img, robot_state):
         driveable_decoded, driveable_mask, preds, driveable_mask_with_objects = self.perception_.process_frame(img)
         cost,cost_obst = self.costmap_.calculate_costmap(driveable_mask, preds, driveable_mask_with_objects)
