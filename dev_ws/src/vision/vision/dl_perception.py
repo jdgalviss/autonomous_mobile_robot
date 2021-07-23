@@ -22,7 +22,7 @@ class PerceptionSystem(object):
         
         # Test Detection Models
         print('Segmentation and Detection Models loaded, Testing the models')
-        img = cv2.imread("./data/73.png")
+        img = cv2.imread("/usr/src/app/dev_ws/src/vision/vision/data/73.png")
         self.h_orig_, self.w_orig_,_ = img.shape
         _, _ = self.seg_model_.process_img_driveable(img,[self.h_orig_,self.w_orig_])
         _ = self.object_detector_.process_frame(img)

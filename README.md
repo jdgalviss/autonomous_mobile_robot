@@ -44,7 +44,9 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
 
 1. Run docker container and jupyterlab
     ```bash
-    docker run --net=host -v `pwd`/dev_ws/src/vision:/usr/src/app/dev_ws/src/vision -it --rm --gpus all amr 
+    docker run --net=host -v /dev/shm:/dev/shm -v `pwd`/dev_ws/src/vision:/usr/src/app/dev_ws/src/vision -it --rm --gpus all amr 
+    docker run -p 8888:8888 -v `pwd`/dev_ws/src/vision:/usr/src/app/dev_ws/src/vision -it --rm --gpus all amr 
+
     jupyter lab --ip=0.0.0.0 --port=8888 --allow-root --no-browser
     ```
 

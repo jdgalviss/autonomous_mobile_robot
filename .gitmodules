@@ -1,6 +1,6 @@
-[submodule "dev_ws/src/dolly"]
-	path = dev_ws/src/dolly
-	url = git@github.com:jdgalviss/dolly.git
+# [submodule "dev_ws/src/dolly"]
+# 	path = dev_ws/src/dolly
+# 	url = git@github.com:jdgalviss/dolly.git
 [submodule "citysim"]
 	path = citysim
 	url = git@github.com:jdgalviss/citysim.git

@@ -1,3 +1,5 @@
+import sys
+sys.path.append("/usr/src/app/dev_ws/src/vision/vision")
 import torch
 import numpy as np
 import cv2
@@ -8,8 +10,7 @@ from utils.general import check_img_size, check_requirements, check_imshow, colo
 from utils.plots import colors, plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 import os
-import sys
-sys.path.append("/usr/src/app/dev_ws/src/vision/vision")
+
 
 class ObjectDetector(object):
     def __init__(self, model_path):

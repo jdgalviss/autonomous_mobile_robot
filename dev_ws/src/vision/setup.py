@@ -2,13 +2,13 @@ from setuptools import setup
 
 package_name = 'vision'
 models = 'vision/models'
-# utils = 'vision/utils'
+utils = 'vision/utils'
 
 
 setup(
     name=package_name,
     version='0.0.0',
-    packages=[package_name, models],
+    packages=[package_name, models, utils],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -27,7 +27,11 @@ setup(
     tests_require=['pytest'],
     scripts=["vision/segmentation.py", 
             "vision/object_detection.py", 
-                "vision/helpers.py"],
+            "vision/costmap.py", 
+            "vision/dl_perception.py", 
+            "vision/planner.py", 
+            "vision/navigation.py", 
+            "vision/helpers.py"],
     entry_points={
         'console_scripts': [
             'vision_node = vision.vision_node:main'

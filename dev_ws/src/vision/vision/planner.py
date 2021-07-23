@@ -94,6 +94,7 @@ class PotentialFieldPlanner(object):
         result_birdview = np.uint8(result_birdview*255.0)
         unwarped_birdview = cv2.warpPerspective(result_birdview, self.M_inv_, (w_orig,h_orig), flags=cv2.INTER_LINEAR)
     #     unwarped_birdview = np.uint8(unwarped_birdview*255.0)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         output = cv2.addWeighted(img, 0.8, unwarped_birdview, 0.5, 0)  
         output = cv2.addWeighted(output, 0.9, driveable_mask, 0.1, 0)    
 

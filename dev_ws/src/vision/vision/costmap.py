@@ -76,12 +76,8 @@ class CostMap(object):
             ax.set_title('Surface plot')
             ax.view_init(40, -70)
             plt.show()
-
-        
-        
         return cost_fcn, cost_obst
         
-
     def gaus2d(self, x=0, y=0, mx=0, my=0, sx=1, sy=1):
         return 1. / (2. * np.pi * sx * sy) * np.exp(-((x - mx)**2. / (2. * sx**2.) + (y - my)**2. / (2. * sy**2.)))
     
