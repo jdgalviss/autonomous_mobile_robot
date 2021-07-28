@@ -78,7 +78,7 @@ class PotentialFieldPlanner(object):
         # self.motion_model = self.get_motion_model()
         previous_ids = deque()
         ix = round(WIDTH/2)
-        iy = round(HEIGHT-5) 
+        iy = round(HEIGHT-20) 
         path = []
         while(ix > 5 and iy > 50 and ix< WIDTH-5):
             minp = float("inf")

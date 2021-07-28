@@ -7,7 +7,7 @@ import numpy as np
 
 OSCILLATIONS_DETECTION_LENGTH = 3
 LOOK_AHEAD = 45
-Kp = 0.22
+Kp = 0.27
 Ki = 0.001
 Kd = 0.0
 HEADING_THRESHOLD = 45*math.pi/180.0
@@ -41,9 +41,9 @@ class NavigationSystem(object):
             path = self.transform_path(path, robot_state)
 
         result_img, result_birdview = self.planner_.draw_result(img, cost_obst, path_img, driveable_decoded)
-        return path, driveable_mask, result_birdview
+        # return path, driveable_mask, result_birdview
 
-        # return path, result_img, result_birdview
+        return path, result_img, result_birdview
 
     def local_planner_step(self, robot_state_, global_plan):
         distances = (robot_state_[0]-global_plan[:,0])**2 + (robot_state_[1]-global_plan[:,1])**2

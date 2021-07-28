@@ -22,6 +22,7 @@ import time
 pkg_sem_seg = get_package_share_directory('vision')
 GLOBAL_PLAN_TIME = 0.5
 LOCAL_PLAN_TIME = 0.05
+PUBLISH_EVERY = 4
 
 HEIGHT=480
 WIDTH=480
@@ -60,6 +61,7 @@ class VisionNode(Node):
         self.is_saved = False
         self.image_msg_ = None
         self.global_plan_ = None
+        self.publish_count_ = 0
         print('Vision Module ready!')
 
 
@@ -75,6 +77,7 @@ class VisionNode(Node):
 
             # Perform one navigation step (perception and global path planning)
             global_plan, result_img, result_birdview = self.nav_.global_planner_step(image, self.robot_state_)
+            self.publish_count_ += 1 
             if(global_plan.shape[0] > 1):
                 self.global_plan_ = global_plan
                 # Publish topics
@@ -91,7 +94,8 @@ class VisionNode(Node):
                     pose.pose.position.y = point[1]
                     pose.pose.orientation.w = 1.0
                     poses.append(pose)
-                path_msg.poses = poses
+                    path_msg.poses = poses
+                # if(self.publish_count_ > PUBLISH_EVERY):
                 self.global_path_publisher_.publish(path_msg)
 
                 # Costmap
@@ -116,9 +120,9 @@ class VisionNode(Node):
                 self.costmap_publisher_.publish(costmap_msg)
 
                 path_img = Image()
-                
+                    
 
-                result_img = cv2.cvtColor(np.uint8(result_img), cv2.COLOR_GRAY2RGB)
+                # result_img = cv2.cvtColor(np.uint8(result_img), cv2.COLOR_GRAY2RGB)
 
                 path_img = self.bridge.cv2_to_imgmsg(result_img)
                 path_img.header.frame_id = 'chassis'
@@ -133,6 +137,7 @@ class VisionNode(Node):
                 path_img.header.stamp = self.get_clock().now().to_msg()
                 path_img.encoding = self.image_msg_.encoding
                 self.birdeye_publisher_.publish(path_img)
+                self.publish_count_ = 0
             else:
                 print("No global plan generated")
 
