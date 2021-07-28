@@ -13,31 +13,52 @@ class PotentialFieldPlanner(object):
                           
     def __init__(self, M_inv):
         self.M_inv_ = M_inv
+        self.motion_model = self.get_motion_model(5)
         print("Planner")
                          
-    def get_motion_model(self):
+    def get_motion_model(self, size):
         # dx, dy
-        motion = [
-                #   [2, 0], #right
-    #               [0, 2], #back
-                #   [-2, 0], #left
-                  #[0, -3], # front
-                  [-1, -2],#front-left
-                  [-2, -2],#front-left
-                  [-2, -1],#front-left
+        motion_model = []
+        for i in range(-size,size):
+            for j in range(1,size):
+                if(i != 0):
+                    motion_model.append([i,-j])
 
-                    #   [-3, -4],#front-left
-                    #   [-4, -4],#front-left
-    #               [-1, 2], # back-left
-                  [1, -2], #front-right
-                  [2, -2], #front-right
-                  [2, -1], #front-right
+    #     self.motion_model = [
+    #             #   [2, 0], #right
+    # #               [0, 2], #back
+    #             #   [-2, 0], #left
+    #               #[0, -3], # front
+    #               [-1, -2],#front-left
+    #               [-2, -2],#front-left
+    #               [-2, -1],#front-left
 
-                #   [3, -4], #front-right
-                #   [4, -4], #front-right
-    # #               [1, 1]  #back-right
-                  ]
-        return motion
+    #               [-1, -4],#front-left
+    #               [-3, -4],#front-left
+
+    #               [-3, -1],#front-left
+    #               [-3, -2],#front-left
+
+
+
+    #                 #   [-3, -4],#front-left
+    #                 #   [-4, -4],#front-left
+    # #               [-1, 2], # back-left
+    #               [1, -2], #front-right
+    #               [2, -2], #front-right
+    #               [2, -1], #front-right
+
+    #               [1, -4],#front-right
+    #               [3, -4],#front-right
+
+    #               [3, -1],#front-right
+    #               [3, -2],#front-right
+
+    #             #   [3, -4], #front-right
+    #             #   [4, -4], #front-right
+    # # #               [1, 1]  #back-right
+                #   ]
+        return motion_model
 
     def oscillations_detection(self,previous_ids, ix, iy):
         previous_ids.append((ix, iy))
@@ -54,22 +75,22 @@ class PotentialFieldPlanner(object):
 
     def calculate_path(self,pmap):
         output = pmap.copy()*0
-        motion = self.get_motion_model()
+        # self.motion_model = self.get_motion_model()
         previous_ids = deque()
         ix = round(WIDTH/2)
-        iy = round(HEIGHT) 
+        iy = round(HEIGHT-5) 
         path = []
         while(ix > 5 and iy > 50 and ix< WIDTH-5):
             minp = float("inf")
             minix, miniy = 0, -1
-            for i, _ in enumerate(motion):
-                inx = int(ix + 1*motion[i][0])
-                iny = int(iy + 1*motion[i][1])
+            for i, _ in enumerate(self.motion_model):
+                inx = int(ix + 1*self.motion_model[i][0])
+                iny = int(iy + 1*self.motion_model[i][1])
                 if inx >= WIDTH or iny >= HEIGHT or inx < 0 or iny < 0:
                     p = float("inf")  # outside area
                     print("outside potential!")
                 else:
-                    p = pmap[iny][inx] * (math.sqrt(motion[i][0]**2 + motion[i][1]**2))
+                    p = pmap[iny][inx] * (math.sqrt(self.motion_model[i][0]**2 + self.motion_model[i][1]**2))
 
                 if minp >= p:
                     minp = p
@@ -94,7 +115,7 @@ class PotentialFieldPlanner(object):
         result_birdview = np.uint8(result_birdview*255.0)
         unwarped_birdview = cv2.warpPerspective(result_birdview, self.M_inv_, (w_orig,h_orig), flags=cv2.INTER_LINEAR)
     #     unwarped_birdview = np.uint8(unwarped_birdview*255.0)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         output = cv2.addWeighted(img, 0.8, unwarped_birdview, 0.5, 0)  
         output = cv2.addWeighted(output, 0.9, driveable_mask, 0.1, 0)    
 

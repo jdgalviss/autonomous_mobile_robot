@@ -6,12 +6,12 @@ import math
 import numpy as np
 
 OSCILLATIONS_DETECTION_LENGTH = 3
-LOOK_AHEAD = 40
-Kp = 0.1
-Ki = 0.0001
-Kd = 0.0001
-HEADING_THRESHOLD = 50*math.pi/180.0
-MAX_SPEED = 0.22
+LOOK_AHEAD = 45
+Kp = 0.22
+Ki = 0.001
+Kd = 0.0
+HEADING_THRESHOLD = 45*math.pi/180.0
+MAX_SPEED = 0.45
 
 class NavigationSystem(object):
     def __init__(self, log = False): 
@@ -29,12 +29,11 @@ class NavigationSystem(object):
         path = np.array([path_x,path_y])
         path = np.transpose(path)
         path += robot_state[:2]
-        print(path.shape)
         return path
 
     def global_planner_step(self, img, robot_state):
-        driveable_decoded, driveable_mask, preds, driveable_mask_with_objects = self.perception_.process_frame(img)
-        cost,cost_obst = self.costmap_.calculate_costmap(driveable_mask, preds, driveable_mask_with_objects)
+        driveable_decoded, driveable_mask, preds, driveable_mask_with_objects, img_decoded = self.perception_.process_frame(img)
+        cost,cost_obst, driveable_mask = self.costmap_.calculate_costmap(driveable_mask, preds, driveable_mask_with_objects)
         path, path_img = self.planner_.calculate_path(cost)
 
         # Transform path to global frame
@@ -42,7 +41,9 @@ class NavigationSystem(object):
             path = self.transform_path(path, robot_state)
 
         result_img, result_birdview = self.planner_.draw_result(img, cost_obst, path_img, driveable_decoded)
-        return path, result_img, result_birdview
+        return path, driveable_mask, result_birdview
+
+        # return path, result_img, result_birdview
 
     def local_planner_step(self, robot_state_, global_plan):
         distances = (robot_state_[0]-global_plan[:,0])**2 + (robot_state_[1]-global_plan[:,1])**2
@@ -54,16 +55,19 @@ class NavigationSystem(object):
         pose_error = local_goal - robot_state_[:2]
         heading_goal = math.atan2(pose_error[1],pose_error[0])
         heading_error = heading_goal - robot_state_[2]
+
+        heading_error = math.atan2(math.sin(heading_error),math.cos(heading_error))
+
         self.heading_error_int_ += heading_error
-        yaw_rate_cmd = Kp*heading_error + Ki*self.heading_error_int_ + Kd*(heading_error-self.prev_heading_error)
+        yaw_rate_cmd = Kp*(heading_error + Ki*self.heading_error_int_ + Kd*(heading_error-self.prev_heading_error))
         self.prev_heading_error = heading_error
         if(abs(heading_error)<HEADING_THRESHOLD):
             vel_cmd = 1.0*distances[min_idx]
             if (vel_cmd > MAX_SPEED): vel_cmd = MAX_SPEED 
         else:
             vel_cmd = 0.0
-        print('vel_cmd: {}'.format(vel_cmd))
-        print('yaw_rate_cmd: {}'.format(yaw_rate_cmd))
+        # print('vel_cmd: {}'.format(vel_cmd))
+        # print('yaw_rate_cmd: {}'.format(yaw_rate_cmd))
         return vel_cmd, yaw_rate_cmd
         
 

@@ -3,9 +3,11 @@ import math
 import cv2
 import matplotlib.pyplot as plt
 
-HORIZ_ANGLE_THRESHOLD = 15*math.pi/180.0
-FORWARD_WEIGHT = 2.0
-CENTER_WEIGHT = 0.4
+HORIZ_ANGLE_THRESHOLD = 20*math.pi/180.0
+FORWARD_WEIGHT = 1.5
+CENTER_WEIGHT = 0.3
+OBSTACLE_WEIGHT = 3.0#2.0
+
 HEIGHT=480
 WIDTH=480
 PIXEL_PER_METER_X = (WIDTH - 2*150)/3.0 #Horizontal distance between src points in the real world ( I assumed 3.0 meters)
@@ -22,15 +24,15 @@ class CostMap(object):
         self.log = log
         
     def calculate_costmap(self,driveable_mask, preds, driveable_mask_with_objects):
-        
-        
         # Find sidewalk edge lines and angle
         # h,w = driveable_mask.shape
         if(self.log):
             fig, ax = plt.subplots(figsize=(20, 10))
             ax.imshow(driveable_mask)
             plt.show()
+
         angle_avg, m_avg, b_avg = self.sidewalk_lines(driveable_mask, driveable_mask_with_objects) #driveable_mask_with_objects contains all objects and lines
+        
         if(self.log):
             fig, ax = plt.subplots(figsize=(20, 10))
             ax.imshow(driveable_mask_with_objects)
@@ -46,7 +48,7 @@ class CostMap(object):
         cost_forward = self.forward_cost(angle_avg)
 
         # Total cost
-        cost_fcn = cost_obst+cost_forward*FORWARD_WEIGHT+cost_center*CENTER_WEIGHT
+        cost_fcn = cost_obst*OBSTACLE_WEIGHT+cost_forward*FORWARD_WEIGHT+cost_center*CENTER_WEIGHT
 
         if(self.log):
             fig, ax = plt.subplots(figsize=(20, 10))
@@ -76,14 +78,19 @@ class CostMap(object):
             ax.set_title('Surface plot')
             ax.view_init(40, -70)
             plt.show()
-        return cost_fcn, cost_obst
+
+        display_cost = (cost_obst*OBSTACLE_WEIGHT + CENTER_WEIGHT*cost_center)
+        display_cost = display_cost / np.amax(display_cost)
+        return cost_fcn, display_cost, driveable_mask_with_objects
+        
+        # return cost_fcn, cost_obst, driveable_mask_with_objects
         
     def gaus2d(self, x=0, y=0, mx=0, my=0, sx=1, sy=1):
         return 1. / (2. * np.pi * sx * sy) * np.exp(-((x - mx)**2. / (2. * sx**2.) + (y - my)**2. / (2. * sy**2.)))
     
-    def obstacle_cost(self, mask_with_objects, gaussian_shape = 150):
+    def obstacle_cost(self, mask_with_objects, gaussian_shape = 125):
         x = np.linspace(-2, 2,gaussian_shape)
-        y = np.linspace(-2, 2,gaussian_shape*2)
+        y = np.linspace(-2, 2,int(gaussian_shape*2.5))
         x, y = np.meshgrid(x, y) # get 2D variables instead of 1D
         z = self.gaus2d(x, y)
         z = np.float32(z)
@@ -115,12 +122,13 @@ class CostMap(object):
         mask = np.uint8(mask)
         
         # Detect lines in driveable area mask
-        lines = cv2.HoughLinesP(mask, 1, 1*np.pi / 180, 100, None, 150, 50)
+        lines = cv2.HoughLinesP(mask, 1, 1*np.pi / 180, 100, None, 200, 70)
 
         line_angles = []
         lines_left = []
         lines_right = []
         lines_found = True
+        angles_horizontal = []
         if(lines is not None):
             for line in lines:
                 x2,y2,x1,y1 = line[0]
@@ -135,14 +143,25 @@ class CostMap(object):
                     x2 = x1_aux
                     y2 = y1_aux
                     angle = -math.atan2(y1-y2,x1-x2)-math.pi/2
+                angle = math.atan2(math.sin(angle), math.cos(angle))
                 line_angles.append(angle)
                     
                 # Detect horizontal lines corresponding to the corners
-                if(abs(angle-math.pi/2) < HORIZ_ANGLE_THRESHOLD):
+                if((abs(math.atan2(math.sin(angle-math.pi/2), math.cos(angle-math.pi/2))) < HORIZ_ANGLE_THRESHOLD)):
+                    # angle = -angle
+                    angles_horizontal.append(angle)
                     cv2.line(mask_out,(round(x1),round(y1)),(round(x2),round(y2)),100,1)
-                # cv2.line(mask_out,(round(x1),round(y1)),(round(x2),round(y2)),100,1)
-                
+                    is_horizontal = True
 
+                elif((abs(math.atan2(math.sin(angle+math.pi/2), math.cos(angle+math.pi/2))) < HORIZ_ANGLE_THRESHOLD)):
+                    angles_horizontal.append(angle)
+                    cv2.line(mask_out,(round(x1),round(y1)),(round(x2),round(y2)),100,1)
+                    is_horizontal = True
+                # cv2.line(mask_out,(round(x1),round(y1)),(round(x2),round(y2)),100,1)
+                else:
+                    is_horizontal = False
+                
+            
                 # Detect coordinate at the bottom of image
                 if(x2 == x1): x2 += 1 # Avoid dividing by 0
                 if(y2 == y1): y2 += 1 # Avoid dividing by 0
@@ -157,7 +176,7 @@ class CostMap(object):
                 x3 = round(-b/m)
 
                 # Add lines to the left and right list
-                if(x1<WIDTH/2):
+                if(x1<WIDTH/2 and not is_horizontal): # Condition valid when the robot is going counter clockwise
                     lines_left.append([x1,y1,x2,y2,x3,y3])
                     # lines_left.append([m,b,x2,y2,x1,y1])
                 else:
@@ -252,13 +271,36 @@ class CostMap(object):
             angle_left = -math.atan2(y1_left-y2_left,x1_left-x2_left)-math.pi/2
             angle_right = -math.atan2(y1_right-y2_right,x1_right-x2_right)-math.pi/2
 
+            angle_left = math.atan2(math.sin(angle_left), math.cos(angle_left))
+            angle_right = math.atan2(math.sin(angle_right), math.cos(angle_right))
+
+
+
             cv2.line(mask_out,(round(x1_left),round(y1_left)),(round(x2_left),round(y2_left)),255,8)
             cv2.line(mask_out,(round(x1_right),round(y1_right)),(round(x2_right),round(y2_right)),255,8)
             # Calculate middle line
-            angle_avg = (angle_left + angle_right) / 2.0
+            if len(angles_horizontal) > 0:
+                # angle_horizontal = np.average(np.array(angles_horizontal))
+                # angle_avg = (angle_left + angle_right + 4.0*angle_horizontal) / 6.0
+                angle_avg = (angle_left + angle_right) / 2.0
+
+                if angle_avg < 0.0:
+                    angle_avg += math.pi
+                # print(angle_horizontal)
+
+            else:
+                angle_avg = (angle_left + angle_right) / 2.0
+            angle_avg = math.atan2(math.sin(angle_avg), math.cos(angle_avg))
+            if((angle_avg>math.pi/2 and angle_avg<math.pi) or (angle_avg>-math.pi and angle_avg<-math.pi/2)):
+                angle_avg += math.pi
+            angle_avg = math.atan2(math.sin(angle_avg), math.cos(angle_avg))
+            
+
+            angle_avg = max(min(angle_avg, math.pi/4.0), -math.pi/4.0)
             m_avg = math.tan(-angle_avg+math.pi/2.0)
             x_center = ( x1_left + x1_right ) / 2.0
             b_avg = HEIGHT - m_avg*x_center
+
         else:
             m_avg = None
             b_avg = None

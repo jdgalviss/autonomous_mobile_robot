@@ -160,7 +160,8 @@ def get_driveable_mask2(warped, warped_center):
             min_d = d
         prev_angle = angle
     for p in points_definitive:
-        cv2.circle(contours_mask, (p[0], p[1]),8,255, -1)
+        if(p[0] != int(WIDTH/2) and (p[1]!= HEIGHT)):
+            cv2.circle(contours_mask, (p[0], p[1]),15,255, -1)
         
     return contours_mask
 

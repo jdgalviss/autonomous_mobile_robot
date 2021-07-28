@@ -48,13 +48,13 @@ class PerceptionSystem(object):
                 x = w_rate*(pred[0]+pred[2])/2.0 # Ground middle point
                 y = h_rate*pred[3]
                 if(pred[5]==0): #person
-                    wr = 20
-                    hr = 20
-                    color = 150
+                    wr = 40
+                    hr = 60
+                    color = 255
                 else:
-                    wr = 20
-                    hr = 40
-                    color = 150
+                    wr = 30
+                    hr = 90
+                    color = 255
                 pos_orig = np.array([[[x,y]]],dtype=np.float32)
                 warped_birdview = cv2.perspectiveTransform(pos_orig, self.M_)[0][0] # Transform middle ground point to birdview
                 warped_birdview = np.uint16(warped_birdview)
@@ -76,4 +76,4 @@ class PerceptionSystem(object):
         driveable_mask_with_objects = driveable_mask.copy()
         self.add_detections_birdview(preds, driveable_mask_with_objects)
         
-        return driveable_decoded, driveable_mask, preds, driveable_mask_with_objects
+        return driveable_decoded, driveable_mask, preds, driveable_mask_with_objects, img_decoded
