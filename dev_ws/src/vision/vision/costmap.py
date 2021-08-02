@@ -4,9 +4,9 @@ import cv2
 import matplotlib.pyplot as plt
 
 HORIZ_ANGLE_THRESHOLD = 20*math.pi/180.0
-FORWARD_WEIGHT = 1.5
-CENTER_WEIGHT = 0.3
-OBSTACLE_WEIGHT = 3.0#2.0
+FORWARD_WEIGHT = 0.25#1.5
+CENTER_WEIGHT = 0.5#0.3
+OBSTACLE_WEIGHT = 4.0#2.0
 
 HEIGHT=480
 WIDTH=480
@@ -16,28 +16,18 @@ AVG_SIDEWALK_WIDTH = round(3.9*PIXEL_PER_METER_X)
 
 
 class CostMap(object):
-    def __init__(self, M, log = False):
+    def __init__(self, M, debug = False):
         # Temporary
         self.M_ = M
         self.h_orig_ = 720
         self.w_orig_ = 1080
-        self.log = log
+        self.debug_ = debug
         
     def calculate_costmap(self,driveable_mask, preds, driveable_mask_with_objects):
         # Find sidewalk edge lines and angle
         # h,w = driveable_mask.shape
-        if(self.log):
-            fig, ax = plt.subplots(figsize=(20, 10))
-            ax.imshow(driveable_mask)
-            plt.show()
-
         angle_avg, m_avg, b_avg = self.sidewalk_lines(driveable_mask, driveable_mask_with_objects) #driveable_mask_with_objects contains all objects and lines
         
-        if(self.log):
-            fig, ax = plt.subplots(figsize=(20, 10))
-            ax.imshow(driveable_mask_with_objects)
-            plt.show()
-
         ## Find distance to center cost
         cost_center = self.center_cost(m_avg,b_avg)
 
@@ -50,7 +40,15 @@ class CostMap(object):
         # Total cost
         cost_fcn = cost_obst*OBSTACLE_WEIGHT+cost_forward*FORWARD_WEIGHT+cost_center*CENTER_WEIGHT
 
-        if(self.log):
+        if(self.debug_):
+            fig, ax = plt.subplots(figsize=(20, 10))
+            ax.imshow(driveable_mask)
+            plt.show()
+            
+            fig, ax = plt.subplots(figsize=(20, 10))
+            ax.imshow(driveable_mask_with_objects)
+            plt.show()
+            
             fig, ax = plt.subplots(figsize=(20, 10))
             ax.imshow(cost_obst)
             plt.show()
@@ -104,15 +102,17 @@ class CostMap(object):
         d = -np.sum(point*normal)# dot product
         xx, yy = np.meshgrid(range(WIDTH), range(HEIGHT))
         cost_forward = (-normal[0]*xx - normal[1]*yy - d)*1./normal[2]
-        return cost_forward
+        return cost_forward/np.amax(np.abs(cost_forward))
 
     def center_cost(self, m,b):
         if m is not None:
             xx, yy = np.meshgrid(range(WIDTH), range(HEIGHT))
             cost_center = abs(-m*xx+yy-b)/math.sqrt(m**2+1)
         else:
+            print("zeros")
             cost_center = np.zeros((WIDTH,HEIGHT))
-        return cost_center/np.amax(cost_center)
+            return cost_center
+        return cost_center/np.amax(np.abs(cost_center))
 
     def reject_outliers(self, data, m=2):
         data_filtered = data[abs(data[:,0] - np.mean(data[:,0])) < m * np.std(data[:,0])]
@@ -150,12 +150,12 @@ class CostMap(object):
                 if((abs(math.atan2(math.sin(angle-math.pi/2), math.cos(angle-math.pi/2))) < HORIZ_ANGLE_THRESHOLD)):
                     # angle = -angle
                     angles_horizontal.append(angle)
-                    cv2.line(mask_out,(round(x1),round(y1)),(round(x2),round(y2)),100,1)
+                    cv2.line(mask_out,(round(x1),round(y1)),(round(x2),round(y2)),250,1)
                     is_horizontal = True
 
                 elif((abs(math.atan2(math.sin(angle+math.pi/2), math.cos(angle+math.pi/2))) < HORIZ_ANGLE_THRESHOLD)):
                     angles_horizontal.append(angle)
-                    cv2.line(mask_out,(round(x1),round(y1)),(round(x2),round(y2)),100,1)
+                    cv2.line(mask_out,(round(x1),round(y1)),(round(x2),round(y2)),250,1)
                     is_horizontal = True
                 # cv2.line(mask_out,(round(x1),round(y1)),(round(x2),round(y2)),100,1)
                 else:
@@ -263,7 +263,10 @@ class CostMap(object):
                     lines_found = False
         else:
             lines_found = False
-        angle_avg = np.average(line_angles)
+        if(len(line_angles) > 0):
+            angle_avg = np.average(line_angles)
+        else:
+            angle_avg = 0.0
 
         if(lines_found):
             # print([x1_right, y1_right, x2_right, y2_right])
@@ -276,8 +279,8 @@ class CostMap(object):
 
 
 
-            cv2.line(mask_out,(round(x1_left),round(y1_left)),(round(x2_left),round(y2_left)),255,8)
-            cv2.line(mask_out,(round(x1_right),round(y1_right)),(round(x2_right),round(y2_right)),255,8)
+            cv2.line(mask_out,(round(x1_left),round(y1_left)),(round(x2_left),round(y2_left)),180,8)
+            cv2.line(mask_out,(round(x1_right),round(y1_right)),(round(x2_right),round(y2_right)),180,8)
             # Calculate middle line
             if len(angles_horizontal) > 0:
                 # angle_horizontal = np.average(np.array(angles_horizontal))

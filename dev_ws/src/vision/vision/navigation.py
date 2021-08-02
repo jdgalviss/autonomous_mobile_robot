@@ -4,6 +4,7 @@ from planner import PotentialFieldPlanner
 import matplotlib.pyplot as plt
 import math
 import numpy as np
+import cv2
 
 OSCILLATIONS_DETECTION_LENGTH = 3
 LOOK_AHEAD = 45
@@ -14,13 +15,14 @@ HEADING_THRESHOLD = 45*math.pi/180.0
 MAX_SPEED = 0.45
 
 class NavigationSystem(object):
-    def __init__(self, log = False): 
+    def __init__(self, debug = False): 
         self.perception_ = PerceptionSystem()
-        self.costmap_ = CostMap(self.perception_.M_, log)
+        self.costmap_ = CostMap(self.perception_.M_, debug)
         self.planner_ = PotentialFieldPlanner(self.perception_.M_inv_)
         # Local Control Variables
         self.heading_error_int_ = 0.0
         self.prev_heading_error = 0.0
+        self.debug_ = debug
 
     def transform_path(self, path, robot_state):
         yaw = robot_state[2] - math.pi/2.0
@@ -40,8 +42,26 @@ class NavigationSystem(object):
         if robot_state is not None:
             path = self.transform_path(path, robot_state)
 
-        result_img, result_birdview = self.planner_.draw_result(img, cost_obst, path_img, driveable_decoded)
+        result_img, result_birdview = self.planner_.draw_result(img, cost_obst, path_img, driveable_decoded, driveable_mask_with_objects)
         # return path, driveable_mask, result_birdview
+        
+        if(self.debug_):
+            segmented_img = cv2.addWeighted(img, 0.8, img_decoded, 0.5, 0)  
+            fig, ax = plt.subplots(figsize=(20, 10))
+            ax.imshow(segmented_img)
+            plt.show()
+
+            fig, ax = plt.subplots(figsize=(20, 10))
+            ax.imshow(driveable_decoded)
+            plt.show()
+            
+            fig, ax = plt.subplots(figsize=(20, 10))
+            ax.imshow(result_img)
+            plt.show()
+            
+            fig, ax = plt.subplots(figsize=(20, 10))
+            ax.imshow(result_birdview)
+            plt.show()
 
         return path, result_img, result_birdview
 

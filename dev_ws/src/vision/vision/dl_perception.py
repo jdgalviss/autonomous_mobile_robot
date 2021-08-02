@@ -6,9 +6,11 @@ import os
 from object_detection import ObjectDetector
 from segmentation import SemanticSegmentation
 from helpers import get_driveable_mask2
+import matplotlib.pyplot as plt
 
 class PerceptionSystem(object):
-    def __init__(self): 
+    def __init__(self, debug = False):
+        self.debug_ = debug
         # Load Models
         segmentation_model_path = os.path.join('/usr/src/app/dev_ws/src/vision/vision', 'pretrained', 'hardnet70_cityscapes_model.pkl')
         self.seg_model_ = SemanticSegmentation(segmentation_model_path)
@@ -33,9 +35,13 @@ class PerceptionSystem(object):
         h,w,_ = driveable_decoded.shape
         # Warp driveable area
         warped = cv2.warpPerspective(driveable_decoded, self.M_, (480, 480), flags=cv2.INTER_LINEAR)
+        if(self.debug_):
+            fig, ax = plt.subplots(figsize=(20, 10))
+            ax.imshow(warped)
+            plt.show()
         # Calculate robot center
         original_center = np.array([[[w/2,h]]],dtype=np.float32)
-        warped_center = cv2.perspectiveTransform(original_center, self.M_)[0][0]    
+        warped_center = cv2.perspectiveTransform(original_center, self.M_)[0][0]   
         driveable_contour_mask = get_driveable_mask2(warped, warped_center)
         return driveable_contour_mask
     
@@ -50,16 +56,15 @@ class PerceptionSystem(object):
                 if(pred[5]==0): #person
                     wr = 40
                     hr = 60
-                    color = 255
+                    color = 200#253
                 else:
                     wr = 30
                     hr = 90
-                    color = 255
+                    color = 220#255
                 pos_orig = np.array([[[x,y]]],dtype=np.float32)
                 warped_birdview = cv2.perspectiveTransform(pos_orig, self.M_)[0][0] # Transform middle ground point to birdview
                 warped_birdview = np.uint16(warped_birdview)
-                cv2.rectangle(driveable_mask, (warped_birdview[0] -int(wr/2), warped_birdview[1]-int(hr/2)), (warped_birdview[0] +int(wr/2), warped_birdview[1]+int(hr/2)), color, -1) 
-
+                cv2.rectangle(driveable_mask, (warped_birdview[0] -int(wr/2), warped_birdview[1]), (warped_birdview[0] +int(wr/2), warped_birdview[1]-hr), color, -1) 
         
     def process_frame(self,img):
         # Semantic Segmentation
@@ -71,6 +76,11 @@ class PerceptionSystem(object):
         
         # Object Detection
         preds = self.object_detector_.process_frame(img)
+        if(self.debug_):
+            detections_img = self.object_detector_.draw_rectangles(img, preds)
+            fig, ax = plt.subplots(figsize=(20, 10))
+            ax.imshow(detections_img)
+            plt.show()
         
         # Add Detections to birdview image
         driveable_mask_with_objects = driveable_mask.copy()

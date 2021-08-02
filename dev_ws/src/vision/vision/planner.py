@@ -2,7 +2,7 @@ import cv2
 from collections import deque
 import numpy as np
 import math
-
+import matplotlib.pyplot as plt
 OSCILLATIONS_DETECTION_LENGTH = 3
 HEIGHT=480
 WIDTH=480
@@ -108,11 +108,16 @@ class PotentialFieldPlanner(object):
             cv2.circle(output, (ix, iy),int(3.0),1, -1)
         return np.array(path),output
 
-    def draw_result(self, img, cost_obst, path_img, driveable_mask):
+    def draw_result(self, img, cost_obst, path_img, driveable_mask, driveable_mask_with_objects):
         h_orig,w_orig,_ = img.shape
-
+        people_img = np.uint8(220*(driveable_mask_with_objects==253))
+        lines_img = np.uint8(255*(driveable_mask_with_objects==250))
+        lines_with_people = cv2.merge([people_img, people_img, lines_img])
+        lines_with_people = np.uint8(lines_with_people)
+        
         result_birdview = cv2.merge([cost_obst, path_img, cost_obst*0])
         result_birdview = np.uint8(result_birdview*255.0)
+        result_birdview = cv2.addWeighted(result_birdview, 0.7, lines_with_people, 1.0, 0)  
         unwarped_birdview = cv2.warpPerspective(result_birdview, self.M_inv_, (w_orig,h_orig), flags=cv2.INTER_LINEAR)
     #     unwarped_birdview = np.uint8(unwarped_birdview*255.0)
         # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
