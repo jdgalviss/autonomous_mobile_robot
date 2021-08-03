@@ -279,8 +279,8 @@ class CostMap(object):
 
 
 
-            cv2.line(mask_out,(round(x1_left),round(y1_left)),(round(x2_left),round(y2_left)),180,8)
-            cv2.line(mask_out,(round(x1_right),round(y1_right)),(round(x2_right),round(y2_right)),180,8)
+            cv2.line(mask_out,(round(x1_left),round(y1_left)),(round(x2_left),round(y2_left)),250,8)
+            cv2.line(mask_out,(round(x1_right),round(y1_right)),(round(x2_right),round(y2_right)),250,8)
             # Calculate middle line
             if len(angles_horizontal) > 0:
                 # angle_horizontal = np.average(np.array(angles_horizontal))

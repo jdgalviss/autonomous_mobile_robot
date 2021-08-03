@@ -56,11 +56,11 @@ class PerceptionSystem(object):
                 if(pred[5]==0): #person
                     wr = 40
                     hr = 60
-                    color = 200#253
+                    color = 253#253
                 else:
                     wr = 30
                     hr = 90
-                    color = 220#255
+                    color = 255#255
                 pos_orig = np.array([[[x,y]]],dtype=np.float32)
                 warped_birdview = cv2.perspectiveTransform(pos_orig, self.M_)[0][0] # Transform middle ground point to birdview
                 warped_birdview = np.uint16(warped_birdview)

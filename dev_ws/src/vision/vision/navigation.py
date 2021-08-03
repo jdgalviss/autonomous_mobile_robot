@@ -8,10 +8,10 @@ import cv2
 
 OSCILLATIONS_DETECTION_LENGTH = 3
 LOOK_AHEAD = 45
-Kp = 0.27
+Kp = 0.35
 Ki = 0.001
 Kd = 0.0
-HEADING_THRESHOLD = 45*math.pi/180.0
+HEADING_THRESHOLD = 35*math.pi/180.0
 MAX_SPEED = 0.45
 
 class NavigationSystem(object):
