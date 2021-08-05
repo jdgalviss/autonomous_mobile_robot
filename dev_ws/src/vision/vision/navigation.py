@@ -62,8 +62,12 @@ class NavigationSystem(object):
             fig, ax = plt.subplots(figsize=(20, 10))
             ax.imshow(result_birdview)
             plt.show()
+        
+        segmented_img = cv2.addWeighted(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), 0.8, img_decoded, 0.5, 0)  
 
-        return path, result_img, result_birdview
+        return path, segmented_img, result_birdview
+#         return path, result_img, result_birdview
+    
 
     def local_planner_step(self, robot_state_, global_plan):
         distances = (robot_state_[0]-global_plan[:,0])**2 + (robot_state_[1]-global_plan[:,1])**2
