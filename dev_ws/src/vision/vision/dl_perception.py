@@ -13,7 +13,7 @@ class PerceptionSystem(object):
         self.debug_ = debug
         # Load Models
         segmentation_model_path = os.path.join('/usr/src/app/dev_ws/src/vision/vision', 'pretrained', 'hardnet70_cityscapes_model.pkl')
-        self.seg_model_ = SemanticSegmentation(segmentation_model_path)
+        self.seg_model_ = FCHarDNetSemanticSegmentation(segmentation_model_path)
         object_detection_model_path = os.path.join('/usr/src/app/dev_ws/src/vision/vision', 'pretrained', 'yolov5s.pt')
         self.object_detector_ = ObjectDetector(object_detection_model_path)
         

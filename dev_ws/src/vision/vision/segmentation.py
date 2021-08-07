@@ -7,7 +7,7 @@ sys.path.append("/usr/src/app/dev_ws/src/vision/vision")
 from models import get_model
 
 
-class SemanticSegmentation(object):
+class FCHarDNetSemanticSegmentation(object):
     def __init__(self, model_path="/usr/src/app/dev_ws/src/vision/vision/pretrained/hardnet70_cityscapes_model.pkl"):
         print("Semantic Segmentation using FCHardNet")
         torch.backends.cudnn.benchmark = True
