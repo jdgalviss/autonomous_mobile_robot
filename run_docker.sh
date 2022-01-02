@@ -9,5 +9,5 @@ docker run -it --rm  \
     -e DISPLAY=$DISPLAY \
     -v $XSOCK:$XSOCK \
     -v $HOME/.Xauthority:/root/.Xauthority \
-    -v `pwd`/workspace:/home/developer/workspace \
-    mobile_robotics "$@"
+    -v `pwd`/dev_ws/src/vision:/usr/src/app/dev_ws/src/vision \
+    amr "$@"
