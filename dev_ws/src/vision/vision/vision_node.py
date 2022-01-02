@@ -13,25 +13,19 @@ from cv_bridge import CvBridge, CvBridgeError
 from ament_index_python.packages import get_package_share_directory
 from navigation import NavigationSystem
 from helpers import euler_from_quaternion
+from semseg.util import config
+
 import cv2
 import numpy as np
-import os
 import math
-import time
 
 pkg_sem_seg = get_package_share_directory('vision')
-GLOBAL_PLAN_TIME = 0.5
-LOCAL_PLAN_TIME = 0.05
-PUBLISH_EVERY = 4
-
-HEIGHT=480
-WIDTH=480
-PIXEL_PER_METER_X = (WIDTH - 2*150)/3.0 #Horizontal distance between src points in the real world ( I assumed 3.0 meters)
-PIXEL_PER_METER_Y = (HEIGHT - 30-60)/8.0 #Vertical distance between src points in the real world ( I assumed 6.0 meters)
-
+CONFIG_FILE = '/usr/src/app/dev_ws/src/vision/vision/cfg/gazebosim_fchardnet_navigation.yaml'
 class VisionNode(Node):
     def __init__(self):
         super().__init__('vision')
+        #config
+        self.cfg_ = config.load_cfg_from_cfg_file(CONFIG_FILE)
         # Publishers
         self.path_img_publisher_ = self.create_publisher(Image, 'vision/path_img', 1)
         self.birdeye_publisher_ = self.create_publisher(Image, 'vision/birdeye_img', 1)
@@ -39,11 +33,12 @@ class VisionNode(Node):
         self.global_path_publisher_ = self.create_publisher(Path, 'global_plan', 1)
         self.cmd_publisher_ = self.create_publisher(Twist, 'cmd_vel', 1)
         self.costmap_publisher_ = self.create_publisher(OccupancyGrid, 'costmap', 1)
+        self.seg_img_publisher_ = self.create_publisher(Image, 'vision/segmented_img', 1)
 
         cmd = Twist()
         self.cmd_publisher_.publish(cmd)
         # Create Navigation System
-        self.nav_ = NavigationSystem(False)
+        self.nav_ = NavigationSystem(self.cfg_)
 
         # Robot State
         self.robot_state_ = np.array([0.0,0.0,0.0])
@@ -55,13 +50,13 @@ class VisionNode(Node):
         self.odom_sub_ = self.create_subscription(Odometry, 'odom', self.odom_callback, 1)
 
         # Planner timers
-        self.global_plan_timer_ = self.create_timer(GLOBAL_PLAN_TIME, self.global_plan_callback)
-        self.local_plan_timer_ = self.create_timer(LOCAL_PLAN_TIME, self.local_plan_callback)
+        self.global_plan_timer_ = self.create_timer(self.cfg_.global_plan_period, self.global_plan_callback)
+        self.local_plan_timer_ = self.create_timer(self.cfg_.local_plan_period, self.local_plan_callback)
 
         self.is_saved = False
         self.image_msg_ = None
         self.global_plan_ = None
-        self.publish_count_ = 0
+        self.count = 0
         print('Vision Module ready!')
 
 
@@ -73,11 +68,14 @@ class VisionNode(Node):
             if not self.is_saved:
                 cv2.imwrite("/usr/src/app/dev_ws/src/vision/dolly.png", image)
                 self.is_saved = True
+            
+            cv2.imwrite("/usr/src/app/dev_ws/src/vision/vision/data/sim/{}.png".format(str(self.count).zfill(4)), cv2.cvtColor(image, cv2.COLOR_BGR2RGB))    
+            self.count += 1
+            
             # image = cv2.resize(image,(960,720))
 
             # Perform one navigation step (perception and global path planning)
-            global_plan, result_img, result_birdview = self.nav_.global_planner_step(image, self.robot_state_)
-            self.publish_count_ += 1 
+            global_plan, result_img, result_birdview, segmented_img = self.nav_.global_planner_step(image, self.robot_state_)
             if(global_plan.shape[0] > 1):
                 self.global_plan_ = global_plan
                 # Publish topics
@@ -102,15 +100,15 @@ class VisionNode(Node):
                 costmap_msg = OccupancyGrid()
                 costmap_msg.header.frame_id = 'odom_demo'
                 costmap_msg.header.stamp = self.image_msg_.header.stamp
-                costmap_msg.info.resolution = 4.0/PIXEL_PER_METER_X
-                costmap = cv2.resize(result_birdview[:,:,0], (int(WIDTH/4.0),int((HEIGHT*PIXEL_PER_METER_X/PIXEL_PER_METER_Y)/4.0)))
+                costmap_msg.info.resolution = 4.0/self.cfg_.pixel_per_meter_x
+                costmap = cv2.resize(result_birdview[:,:,0], (int(self.cfg_.width/4.0),int((self.cfg_.height*self.cfg_.pixel_per_meter_x/self.cfg_.pixel_per_meter_y)/4.0)))
                 costmap = cv2.flip(costmap,-1)
                 costmap_msg.info.width = costmap.shape[0]
                 costmap_msg.info.height = costmap.shape[1]
                 origin_costmap = poses[0].pose
                 origin_costmap.orientation = self.robot_orientation_
-                origin_costmap.position.y -= (WIDTH/(PIXEL_PER_METER_X*2.0))*math.cos(self.robot_state_[2])# Half of the image
-                origin_costmap.position.x += (WIDTH/(PIXEL_PER_METER_X*2.0))*math.sin(self.robot_state_[2])# Half of the image
+                origin_costmap.position.y -= (self.cfg_.width/(self.cfg_.pixel_per_meter_x*2.0))*math.cos(self.robot_state_[2])# Half of the image
+                origin_costmap.position.x += (self.cfg_.width/(self.cfg_.pixel_per_meter_x*2.0))*math.sin(self.robot_state_[2])# Half of the image
                 # origin_costmap.orientation.w = 1.0
                 costmap_msg.info.origin = origin_costmap
                 costmap = np.transpose(costmap)
@@ -137,9 +135,16 @@ class VisionNode(Node):
                 path_img.header.stamp = self.get_clock().now().to_msg()
                 path_img.encoding = self.image_msg_.encoding
                 self.birdeye_publisher_.publish(path_img)
-                self.publish_count_ = 0
             else:
                 print("No global plan generated")
+            # Publish segmented img
+            seg_img = Image()
+            seg_img = self.bridge.cv2_to_imgmsg(segmented_img)
+            seg_img.header.frame_id = 'chassis'
+            seg_img.header.stamp = self.get_clock().now().to_msg()
+            seg_img.encoding = self.image_msg_.encoding
+            self.seg_img_publisher_.publish(seg_img)
+
 
     def local_plan_callback(self):
         if self.global_plan_ is not None:

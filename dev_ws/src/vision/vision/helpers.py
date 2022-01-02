@@ -5,13 +5,13 @@ import math
 import matplotlib.pyplot as plt
 import os
 
-HEIGHT = 480
-WIDTH = 480
-PIXEL_PER_METER_X = (WIDTH - 2*150)/3.0 #Horizontal distance between src points in the real world ( I assumed 2.7 meters)
-PIXEL_PER_METER_Y = (HEIGHT - 30-60)/8.0 #Vertical distance between src points in the real world ( I assumed 8 meters)
-angle_range = [-40.0, 40.0]
-angle_increment = 1.0
-max_distance = 7.0
+# HEIGHT = 480
+# WIDTH = 480
+# PIXEL_PER_METER_X = (WIDTH - 2*150)/3.0 #Horizontal distance between src points in the real world ( I assumed 2.7 meters)
+# PIXEL_PER_METER_Y = (HEIGHT - 30-60)/8.0 #Vertical distance between src points in the real world ( I assumed 8 meters)
+# angle_range = [-40.0, 40.0]
+# angle_increment = 1.0
+# max_distance = 7.0
 
 
 def convert_state_dict(state_dict):
@@ -113,8 +113,10 @@ def get_driveable_mask(warped, warped_center):
 #                 contours_mask[point[0][1], point[0][0]] = 255
     return contours_mask2
 
-def get_driveable_mask2(warped, warped_center):
-    warped_center[1] = warped_center[1] + 0.1*PIXEL_PER_METER_Y # Assume view deadzone (value to be found with propper extrinsic calibration)
+def get_driveable_mask2(warped, warped_center, config):
+    angle_range = [-config.angle_range, config.angle_range]
+
+    warped_center[1] = warped_center[1] + 0.1*config.pixel_per_meter_y # Assume view deadzone (value to be found with propper extrinsic calibration)
     # Calculate driveable area mask
     lower_limit = np.array([50,50,50])
     upper_limit = np.array([200, 200, 200])
@@ -130,8 +132,8 @@ def get_driveable_mask2(warped, warped_center):
     scan_angles = []
     for contour in contours:
         for point in contour:
-            distance = math.sqrt(((point[0][0]-warped_center[0])/PIXEL_PER_METER_X)**2 + ((point[0][1]-warped_center[1])/PIXEL_PER_METER_Y)**2)
-            angle = -math.atan2((point[0][0] - warped_center[0])/PIXEL_PER_METER_X, (warped_center[1]-point[0][1])/PIXEL_PER_METER_Y)
+            distance = math.sqrt(((point[0][0]-warped_center[0])/config.pixel_per_meter_x)**2 + ((point[0][1]-warped_center[1])/config.pixel_per_meter_y)**2)
+            angle = -math.atan2((point[0][0] - warped_center[0])/config.pixel_per_meter_x, (warped_center[1]-point[0][1])/config.pixel_per_meter_y)
             if(angle<angle_range[1]*math.pi/180.0 and angle>angle_range[0]*math.pi/180.0):
                 scan_points.append(np.array([point[0][0], point[0][1]]))
                 scan_distances.append(distance)
@@ -160,8 +162,9 @@ def get_driveable_mask2(warped, warped_center):
             min_d = d
         prev_angle = angle
     for p in points_definitive:
-        if(p[0] != int(WIDTH/2) and (p[1]!= HEIGHT)):
-            cv2.circle(contours_mask, (p[0], p[1]),15,255, -1)
+        if(p[0] != int(config.width/2) and (p[1]!= config.height)):
+            # cv2.circle(contours_mask, (p[0], p[1]),8,255, -1)
+            cv2.circle(contours_mask, (p[0], p[1]),config.edge_point_size,255, -1)
         
     return contours_mask
 

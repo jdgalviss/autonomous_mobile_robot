@@ -18,3 +18,10 @@ dev_ws/src/vision/vision/output/
 
 dev_ws/src/vision/vision/bkup/
 dev_ws/src/vision/vision/data/
+dev_ws/src/vision/vision/results/
+dev_ws/src/vision/vision/_navigation_class-Copy1.ipynb
+dev_ws/src/vision/vision/_navigation_class-Copy1.ipynb
+dev_ws/src/vision/vision/_navigation_class-test1.ipynb
+Dockerfile-jetson
+Dockerfile-ubuntu18
+Dockerfile-ubuntu20

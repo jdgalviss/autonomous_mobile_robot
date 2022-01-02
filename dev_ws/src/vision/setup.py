@@ -16,6 +16,7 @@ setup(
         ('share/' + package_name + "/pretrained", ['vision/pretrained/hardnet70_cityscapes_model.pkl']),
         ('share/' + package_name + "/pretrained", ['vision/pretrained/yolov5s.pt']),
         ('share/' + package_name + "/pretrained", ['vision/PerspectiveTransform.npz']),
+        ('share/' + package_name + "/pretrained", ['vision/PerspectiveTransformSim.npz']),
 
     ],
     install_requires=['setuptools'],
@@ -25,7 +26,8 @@ setup(
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
-    scripts=["vision/segmentation.py", 
+    scripts=["vision/fchardnet_segmentation.py", 
+            "vision/pspnet_segmentation.py", 
             "vision/object_detection.py", 
             "vision/costmap.py", 
             "vision/dl_perception.py", 

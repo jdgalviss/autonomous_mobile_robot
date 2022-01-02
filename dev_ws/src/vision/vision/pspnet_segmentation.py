@@ -16,7 +16,7 @@ from util import config
 
 cv2.ocl.setUseOpenCL(False)
 
-CONFIG_FILE = "semseg/config/ade20k/ade20k_pspnet50.yaml"
+CONFIG_FILE = "/usr/src/app/dev_ws/src/vision/vision/semseg/config/ade20k/ade20k_pspnet50.yaml"
 
 def get_parser():
     cfg = config.load_cfg_from_cfg_file(CONFIG_FILE)
@@ -44,7 +44,7 @@ class PSPNetSematicSegmentation(object):
         std = [0.229, 0.224, 0.225]
         self.std_ = [item * value_scale for item in std]
         # self.colors_ = np.loadtxt(self.args_.colors_path).astype('uint8')
-        self.label_colors_ = self.get_label_colors()
+        
 
         # Load Model
         if self.args_.arch == 'psp':
@@ -66,14 +66,36 @@ class PSPNetSematicSegmentation(object):
         else:
             raise RuntimeError("=> no checkpoint found at '{}'".format(self.args_.model_path))
 
-
-    def get_label_colors(self):
-
-        colors = [  # [  0,   0,   0],
+    def get_label_colors(self, driveable = True):
+        if(driveable >= 0):
+            colors = [  # [  0,   0,   0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0]
+                    ]
+            colors[driveable] = [55, 195, 55]
+        else:
+            colors = [  # [  0,   0,   0],
                     [128, 64, 128],
                     [244, 35, 232],
                     [70, 70, 70],
-                    [102, 102, 156],
+                    [55, 195, 55],
                     [190, 153, 153],
                     [153, 153, 153],
                     [250, 170, 30],
@@ -90,6 +112,7 @@ class PSPNetSematicSegmentation(object):
                     [0, 0, 230],
                     [119, 11, 32],
                 ]
+            
         return dict(zip(range(19), colors))
 
 
@@ -171,14 +194,15 @@ class PSPNetSematicSegmentation(object):
         # color = colorize(gray, colors)
         return gray    
 
-    def colorize(self,labels):
+    def colorize(self,labels, label_colors):
+        labels = np.clip(labels, 0, len(label_colors)-1)
         r = labels.copy()
         g = labels.copy()
         b = labels.copy()
         for l in range(0, 19):
-            r[labels == l] = self.label_colors_ [l][0]
-            g[labels == l] = self.label_colors_ [l][1]
-            b[labels == l] = self.label_colors_ [l][2]
+            r[labels == l] = label_colors [l][0]
+            g[labels == l] = label_colors [l][1]
+            b[labels == l] = label_colors [l][2]
         rgb = np.zeros((labels.shape[0], labels.shape[1], 3))
         rgb[:, :, 0] = r 
         rgb[:, :, 1] = g 
@@ -186,9 +210,13 @@ class PSPNetSematicSegmentation(object):
         return np.uint8(rgb)
 
 
-    def process_img(self, img):
-        decoded_img = self.test(self.model_.eval(),img,  self.args_.classes, self.args_.base_size, self.args_.test_h, self.args_.test_w, self.args_.scales)
+    def process_img_driveable(self, img, size, drivable_idx = -1):
+        img_resized = cv2.resize(img, (int(size[1]), int(size[0])))  # uint8 with RGB mode
+        labeled_img = self.test(self.model_.eval(),img_resized,  self.args_.classes, self.args_.base_size, self.args_.test_h, self.args_.test_w, self.args_.scales)
+        segmented_img = self.colorize(labeled_img, self.get_label_colors(driveable = -1))
+        drivable_img = self.colorize(labeled_img, self.get_label_colors(driveable = drivable_idx))
         
-        # decoded_img = np.array(decoded_img)
-        # decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)  # convert cv2 read image from BGR order to RGB order
-        return self.colorize(decoded_img)
+        return segmented_img, drivable_img
+
+
+    
