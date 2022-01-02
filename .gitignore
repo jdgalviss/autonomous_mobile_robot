@@ -1,7 +1,5 @@
 *.vscode*
-.catkin_workspace
-catkin_ws/build
-catkin_ws/devel
+*.ipynb_checkpoints*
 *__pycache*
 dev_ws/build
 dev_ws/install
@@ -9,6 +7,15 @@ dev_ws/log*
 dev_ws/src/log*
 
 *.log*
-ros1_bridge_ws/build
-ros1_bridge_ws/install
-ros1_bridge_ws/log
+
+dev_ws/src/vision/vision/output/
+
+dev_ws/src/vision/vision/bkup/
+dev_ws/src/vision/vision/data/
+dev_ws/src/vision/vision/results/
+dev_ws/src/vision/vision/_navigation_class-Copy1.ipynb
+dev_ws/src/vision/vision/_navigation_class-Copy1.ipynb
+dev_ws/src/vision/vision/_navigation_class-test1.ipynb
+Dockerfile-jetson
+Dockerfile-ubuntu18
+Dockerfile-ubuntu20

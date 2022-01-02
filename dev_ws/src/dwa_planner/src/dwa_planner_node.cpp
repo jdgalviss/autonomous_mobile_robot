@@ -32,7 +32,7 @@ class DWAPlannerNode : public rclcpp::Node
     {
       // Subscribers
       scan_subscriber_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
-      "vision/image_segmented/scan", 10, std::bind(&DWAPlannerNode::ScanCallback, this, _1));
+      "segmentation/scan", 10, std::bind(&DWAPlannerNode::ScanCallback, this, _1));
 
       odom_subscriber_ = this->create_subscription<nav_msgs::msg::Odometry>(
       "/dolly/odom", 10, std::bind(&DWAPlannerNode::OdomCallback, this, _1));
