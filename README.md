@@ -83,10 +83,9 @@ https://user-images.githubusercontent.com/18732666/147863969-dd330be5-d9da-4aa1-
 Semantic Segmentation + Perspective Transformation
 ![01_perspective](https://user-images.githubusercontent.com/18732666/147863902-18efad81-1d0e-4b3f-8b61-916a744fb96f.png)
 
-Multi-objectiv Cost
+Multi-objective Cost
 ![semanticNav_cost](https://user-images.githubusercontent.com/18732666/147863922-71ebb1f9-97b8-4ef0-9ec4-24e04077310b.png)
 
-Path planning
 
 
 <!-- # Launch Doly
