@@ -1,15 +1,14 @@
 # autonomous_mobile_robot
-This is the implementation of an navigation system for an autonomous mobile robot based on:
+**Note:** Implementation in progress. For a stable version check branch [dwa](https://github.com/jdgalviss/autonomous_mobile_robot/tree/dwa)
 
-1. Semantic Segmentation: From a front facing camera obects in the image are segmented and driveable areas identified.
-2. Perspective Transform: A transformation matrix allows to transform the segmented image to a birdview perspective.
-3. Scan Transformation: The contour of the driveable area is found and then distances from the camera to the driveable area contour are computed. This allows to generate a vector of distances, that resembles the output of a 2D Lidar (/scan msg type in ROS)
-4. Dynamic Window Approach: DWA is used to compute a motion command (velocity and yaw rate) that keeps the robot inside the driveable areas while avoiding obstacles.
+This is the implementation of an navigation system for an autonomous mobile robot using only front-facing RGB Camera. The proposed approach uses **semantic segmentation** to detect drivable areas in an image. These detections are then transformed into a Bird's-Eye view semantic map that also contains spatial information about the distance towards the edges of the drivable area and the objects around the robot. Then, a **multi-objective cost function** is computed from the semantic map and used to generate a safe path for the robot to follow. 
 
-The simulation is implemented in gazebo and uses [dolly](https://github.com/chapulina/dolly) and [citysim](https://github.com/osrf/citysim) forks.
+The code was tested on both simulation and a real robot (clearpath robotics' jackal).
+
+The simulation is implemented in gazebo and uses [dolly](https://github.com/chapulina/dolly) and [citysim](https://github.com/osrf/citysim).
 
 ## Install
-1. Install [ROS 2 eloquent](https://index.ros.org/doc/ros2/Installation/Eloquent/Linux-Install-Debians/).
+1. Install [ROS 2](https://index.ros.org/doc/ros2/Installation/Eloquent/Linux-Install-Debians/).
 
 2. Install Docker following the instructions on the [link](https://docs.docker.com/engine/install/ubuntu/) and [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) (for gpu support). *Semantic segmentation will be run inside docker container, however it could be run on the host with the proper configuration of pytorch*.
 
@@ -44,13 +43,12 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
 
 1. Run docker container and jupyterlab
     ```bash
-    docker run --net=host -v /dev/shm:/dev/shm -v `pwd`/dev_ws/src/vision:/usr/src/app/dev_ws/src/vision -it --rm --gpus all amr 
-    docker run -p 8888:8888 -v `pwd`/dev_ws/src/vision:/usr/src/app/dev_ws/src/vision -it --rm --gpus all amr 
+    source run_docker.sh
 
     jupyter lab --ip=0.0.0.0 --port=8888 --allow-root --no-browser
     ```
 
-2. Follow the instructions in the Jupytenotebook located inside the container in: */usr/src/app/dev_ws/src/semantic_segmentation/semantic_segmentation/warp_scan_segmentation.ipynb*
+2. Follow the instructions in the Jupytenotebook located inside the container in: */usr/src/app/dev_ws/src/vision/vision/_calculate_perspective_transform.ipynb*
 
 ### Run Simulation
 1. On a new terminal run the simulation:
@@ -67,30 +65,15 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
     cd autonomous_mobile_robot
     docker run -p 8888:8888 -v `pwd`/dev_ws/src/semantic_segmentation:/usr/src/app/dev_ws/src/semantic_segmentation -it --rm --gpus all amr 
     ```
-3. Run semantic segmentaton inside docker container
+3. Run docker container and then the semantic segmentation node
     ```bash
-    cd dev_ws
-    . /opt/ros/eloquent/setup.bash 
-    colcon build
-    . install/setup.bash
-    export DOMAIN_ID=0
-    ros2 run semantic_segmentation semantic_segmentation --ros-args --param use_sim_time:=true
+    source run_docker.sh
+    source semantic_segmentation_nav.sh
     ```
-4. In a new terminal run dwa_planner
-    ```bash
-    cd autonomous_mobile_robot
-    . install/setup.bash
-    ros2 run dwa_planner dwa_planner 
-    ```
-5. In a new terminal run the node that generates the waypoint of the path to be followed
-    ```bash
-    cd autonomous_mobile_robot
-    . install/setup.bash
-    ros2 run dwa_planner trajectory_publisher 
-    ```
+    
 
 ## Results
-![alt text](imgs/results.gif "Title")
+
 
 <!-- # Launch Doly
 cd dev_ws
