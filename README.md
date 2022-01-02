@@ -1,6 +1,8 @@
 # autonomous_mobile_robot
 **Note:** Implementation in progress. For a stable version check branch [dwa](https://github.com/jdgalviss/autonomous_mobile_robot/tree/dwa)
 
+![01_results](https://user-images.githubusercontent.com/18732666/147863893-07543d57-ec36-4b0c-b735-990d4cc95fda.png)
+
 This is the implementation of an navigation system for an autonomous mobile robot using only front-facing RGB Camera. The proposed approach uses **semantic segmentation** to detect drivable areas in an image. These detections are then transformed into a Bird's-Eye view semantic map that also contains spatial information about the distance towards the edges of the drivable area and the objects around the robot. Then, a **multi-objective cost function** is computed from the semantic map and used to generate a safe path for the robot to follow. 
 
 The code was tested on both simulation and a real robot (clearpath robotics' jackal).
@@ -73,6 +75,18 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
     
 
 ## Results
+
+
+https://user-images.githubusercontent.com/18732666/147863969-dd330be5-d9da-4aa1-972c-b5d6edf766a6.mp4
+
+
+Semantic Segmentation + Perspective Transformation
+![01_perspective](https://user-images.githubusercontent.com/18732666/147863902-18efad81-1d0e-4b3f-8b61-916a744fb96f.png)
+
+Multi-objectiv Cost
+![semanticNav_cost](https://user-images.githubusercontent.com/18732666/147863922-71ebb1f9-97b8-4ef0-9ec4-24e04077310b.png)
+
+Path planning
 
 
 <!-- # Launch Doly
