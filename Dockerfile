@@ -53,6 +53,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && \
     python3-rosdep \
     python3-colcon-common-extensions \
     nano \
+    ros-foxy-gazebo-ros \
+    ros-foxy-gazebo-plugins \
     && rm -rf /var/lib/apt/lists/*
 RUN /bin/bash -c "rosdep init; rosdep update"
 ENV ROS_DOMAIN_ID=0
@@ -69,5 +71,7 @@ ENV ROS_DOMAIN_ID=0
 #     && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m pip install opencv-python
-COPY dev_ws/semantic_segmentation.sh /usr/src/app/dev_ws/
+COPY dev_ws/semantic_segmentation_nav.sh /usr/src/app/dev_ws/
+COPY dev_ws/run.sh /usr/src/app/dev_ws/
+
 WORKDIR /usr/src/app/
