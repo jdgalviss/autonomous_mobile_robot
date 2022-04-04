@@ -1,6 +1,6 @@
 [submodule "citysim"]
 	path = citysim
-	url = git@github.com:jdgalviss/citysim.git
+	url = https://github.com/jdgalviss/citysim.git
 [submodule "semantic_nav/dev_ws/src/vision/vision/semseg"]
 	path = semantic_nav/dev_ws/src/vision/vision/semseg
 	url = https://github.com/jdgalviss/semseg.git
