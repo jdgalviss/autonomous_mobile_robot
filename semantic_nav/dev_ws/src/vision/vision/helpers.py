@@ -5,13 +5,13 @@ import math
 import matplotlib.pyplot as plt
 import os
 
-HEIGHT = 480
-WIDTH = 480
-PIXEL_PER_METER_X = (WIDTH - 2*150)/3.0 #Horizontal distance between src points in the real world ( I assumed 2.7 meters)
-PIXEL_PER_METER_Y = (HEIGHT - 30-60)/8.0 #Vertical distance between src points in the real world ( I assumed 8 meters)
-angle_range = [-40.0, 40.0]
-angle_increment = 1.0
-max_distance = 7.0
+# HEIGHT = 480
+# WIDTH = 480
+# PIXEL_PER_METER_X = (WIDTH - 2*150)/3.0 #Horizontal distance between src points in the real world ( I assumed 2.7 meters)
+# PIXEL_PER_METER_Y = (HEIGHT - 30-60)/8.0 #Vertical distance between src points in the real world ( I assumed 8 meters)
+# angle_range = [-40.0, 40.0]
+# angle_increment = 1.0
+# max_distance = 7.0
 
 
 def convert_state_dict(state_dict):
