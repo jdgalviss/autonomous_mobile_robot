@@ -108,12 +108,3 @@ class NavigationSystem(object):
         print("motion_control: {} seconds".format(end-start))
 
         return vel_cmd, yaw_rate_cmd
-        
-
-#     def seg2scan(self, driveable_area):
-#         h,w,_ = driveable_area.shape
-#         warped = cv2.warpPerspective(driveable_area, M, (480, 480), flags=cv2.INTER_LINEAR)
-#         original_center = np.array([[[w/2,h]]],dtype=np.float32)
-#         warped_center = cv2.perspectiveTransform(original_center, M)[0][0]
-#         scan_distances, angle_increment, warped_contours = warped2scan(warped, warped_center)
-#         return warped, warped_contours, scan_distances, angle_increment

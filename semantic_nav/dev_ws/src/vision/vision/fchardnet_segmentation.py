@@ -114,9 +114,6 @@ class FCHarDNetSemanticSegmentation(object):
         return decoded
 
     def process_img_driveable(self, img, size, drivable_idx = -1):
-        #print("Read Input Image from : {}".format(img_path))
-        print("=============")
-        print(img.shape)
         img_resized = cv2.resize(img, (int(size[1]), int(size[0])))  # uint8 with RGB mode
         img = img_resized.astype(np.float16)
 
