@@ -1,9 +1,9 @@
-[submodule "dev_ws/src/dolly"]
-	path = semantic_nav/dev_ws/src/dolly
-	url = git@github.com:jdgalviss/dolly.git
 [submodule "citysim"]
 	path = citysim
 	url = git@github.com:jdgalviss/citysim.git
-[submodule "dev_ws/src/vision/vision/semseg"]
+[submodule "semantic_nav/dev_ws/src/vision/vision/semseg"]
 	path = semantic_nav/dev_ws/src/vision/vision/semseg
 	url = https://github.com/jdgalviss/semseg.git
+[submodule "semantic_nav/dev_ws/src/dolly"]
+	path = semantic_nav/dev_ws/src/dolly
+	url = https://github.com/jdgalviss/dolly.git
