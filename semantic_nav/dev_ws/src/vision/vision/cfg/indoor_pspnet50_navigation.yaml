@@ -1,0 +1,58 @@
+BIRDEYE_VIEW:
+  perspective_transform_path: '/usr/src/app/dev_ws/src/vision/vision/PerspectiveTransform.npz'
+  height: 480
+  width: 480
+  pixel_per_meter_x: 80.0 # how many pixels are equivalent to 1m in X-axis
+  pixel_per_meter_y: 90.0 # how many pixels are equivalent to 1m in Y-axis
+
+  angle_range: 50.0 # FOV of the camera to take into account 
+                    # in the bird eye view to define edges of the driveable area
+  angle_increment: 1.0
+  max_distance: 7.0   # Maximum distance at which drivable area edges are considered
+
+COST_FCN:
+  horizontal_angle_threshold: 20.0 # Threshold inside which a line/edge will be considered horizontal 
+  avg_driveable_area_width: 170.0 # Average driveable area width in pixels, used to estimate a 
+                                # second edge when only one edge is found (width[m]*pixel_per_meter_x)
+  forward_weight: 5.0 # Weight of the cost function that forces the robot to go forward
+  center_weight: 0.5 #1.25  # Weight of the cost function that forces the robot to stay in the center 
+  obstacle_weight: 3.0  # Weight of the cost function that forces the robot to avoid obstacles and drivable area edges
+  obstacle_inflation: 80
+  min_line_length: 90
+
+GLOBAL_PLANNING:
+  oscillations_detection_length: 3 # Number of oscillations after which path search stops
+  global_plan_period: 0.5
+  start_idx: 5
+
+
+MOTION_CONTROL:
+  local_plan_period: 0.05
+  look_ahead: 35 # Number of elements to look ahead in global path for pure pursuit controller
+  Kp: 0.35 # Proportional constant heading PID controller
+  Ki: 0.001 # Proportional constant heading PID controller
+  Kd: 0.0 # Proportional constant heading PID controller
+  heading_threshold: 35.0 # [Degrees]
+  max_speed: 0.45 # [m/s]
+
+SEMANTIC_SEGMENTATION:
+  model_name: 'pspnet50_ade20k' # Options:
+                                # - fchardnet
+                                # - pspnet50_ade20k
+                                # - pspnet50_cityscapes
+  # Following parameters will be used depending on model name
+  #fchardnet:
+  model_path: '/usr/src/app/dev_ws/src/vision/vision/pretrained/hardnet70_cityscapes_model.pkl'
+  #pspnet:
+  model_config_file: '/usr/src/app/dev_ws/src/vision/vision/semseg/config/ade20k/ade20k_pspnet50.yaml'
+  drivable_idx: 3
+
+
+OBJECT_DETECTION:
+  model_path_yolo: '/usr/src/app/dev_ws/src/vision/vision/pretrained/yolov5s.pt'
+
+OTHER:
+  debug: true # To be used when displaying intermediate steps with matplotlib in jupyter notebook
+  original_height: 360 #270
+  original_width: 480
+  edge_point_size: 5

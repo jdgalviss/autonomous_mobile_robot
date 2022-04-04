@@ -1,21 +1,24 @@
 *.vscode*
 *.ipynb_checkpoints*
 *__pycache*
-dev_ws/build
-dev_ws/install
-dev_ws/log*
-dev_ws/src/log*
+semantic_nav/dev_ws/build
+semantic_nav/dev_ws/install
+semantic_nav/dev_ws/log*
+semantic_nav/dev_ws/src/log*
 
 *.log*
 
-dev_ws/src/vision/vision/output/
+semantic_nav/dev_ws/src/vision/vision/output/
 
-dev_ws/src/vision/vision/bkup/
-dev_ws/src/vision/vision/data/
-dev_ws/src/vision/vision/results/
-dev_ws/src/vision/vision/_navigation_class-Copy1.ipynb
-dev_ws/src/vision/vision/_navigation_class-Copy1.ipynb
-dev_ws/src/vision/vision/_navigation_class-test1.ipynb
+semantic_nav/dev_ws/src/vision/vision/bkup/
+semantic_nav/dev_ws/src/vision/vision/data/
+semantic_nav/dev_ws/src/vision/vision/results/
+semantic_nav/dev_ws/src/vision/vision/_navigation_class-Copy1.ipynb
+semantic_nav/dev_ws/src/vision/vision/_navigation_class-Copy1.ipynb
+semantic_nav/dev_ws/src/vision/vision/_navigation_class-test1.ipynb
 Dockerfile-jetson
 Dockerfile-ubuntu18
 Dockerfile-ubuntu20
+
+pretrained_models/exp
+pretrained_models/initmodel
