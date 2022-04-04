@@ -53,21 +53,15 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && \
     python3-rosdep \
     python3-colcon-common-extensions \
     nano \
+    ros-foxy-gazebo-ros \
+    ros-foxy-gazebo-plugins \
     && rm -rf /var/lib/apt/lists/*
 RUN /bin/bash -c "rosdep init; rosdep update"
 ENV ROS_DOMAIN_ID=0
 
-# Install ROS 1
-# RUN /bin/bash -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-# RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-# RUN DEBIAN_FRONTEND=noninteractive apt update && \
-#     apt install -y ros-melodic-ros-base \
-#     libeigen3-dev \
-#     ros-melodic-catkin \
-#     python-catkin-tools \
-#     ros-foxy-ros1-bridge \
-#     && rm -rf /var/lib/apt/lists/*
-
 RUN python3 -m pip install opencv-python
-COPY dev_ws/semantic_segmentation.sh /usr/src/app/dev_ws/
-WORKDIR /usr/src/app/
+COPY dev_ws/semantic_segmentation_nav.sh /usr/src/app/dev_ws/
+COPY dev_ws/simulation.sh /usr/src/app/dev_ws/
+COPY dev_ws/run.sh /usr/src/app/dev_ws/
+
+WORKDIR /usr/src/app/dev_ws

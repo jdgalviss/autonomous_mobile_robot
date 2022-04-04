@@ -1,5 +1,5 @@
 # autonomous_mobile_robot
-**Note:** Implementation in progress. For a stable version check branch [dwa](https://github.com/jdgalviss/autonomous_mobile_robot/tree/dwa)
+**Note:** Old Implementation using DWAin citysim: [dwa](https://github.com/jdgalviss/autonomous_mobile_robot/tree/dwa)
 
 ![left0416](https://user-images.githubusercontent.com/18732666/150397275-75c7059a-a19b-430e-86b7-f61506884739.jpg)
 
@@ -8,11 +8,13 @@ https://user-images.githubusercontent.com/18732666/147863969-dd330be5-d9da-4aa1-
 <!--
 ![01_results](https://user-images.githubusercontent.com/18732666/147863893-07543d57-ec36-4b0c-b735-990d4cc95fda.png)
 -->
-This is the implementation of an navigation system for an autonomous mobile robot using only front-facing RGB Camera. The proposed approach uses **semantic segmentation** to detect drivable areas in an image. These detections are then transformed into a Bird's-Eye view semantic map that also contains spatial information about the distance towards the edges of the drivable area and the objects around the robot. Then, a **multi-objective cost function** is computed from the semantic map and used to generate a safe path for the robot to follow. 
+This is the implementation of an navigation system for an autonomous mobile robot using only front-facing RGB Camera. The proposed approach uses **semantic segmentation** to detect drivable areas in an image and object detection to emphasize objects of interest such as people and cars using yolov5. These detections are then transformed into a Bird's-Eye view semantic map that also contains spatial information about the distance towards the edges of the drivable area and the objects around the robot. Then, a **multi-objective cost function** is computed from the semantic map and used to generate a safe path for the robot to follow. 
 
 The code was tested on both simulation and a real robot (clearpath robotics' jackal).
 
 The simulation is implemented in gazebo and uses [dolly](https://github.com/chapulina/dolly) and [citysim](https://github.com/osrf/citysim).
+
+Semantic segmentation is strongly based on [PSPNet](https://github.com/hszhao/semseg) and [FCHardNet](https://github.com/PingoLH/FCHarDNet).
 
 ## Install
 1. Install [ROS 2](https://index.ros.org/doc/ros2/Installation/Eloquent/Linux-Install-Debians/).
@@ -24,28 +26,38 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
     git clone --recursive -j8 https://github.com/jdgalviss/autonomous_mobile_robot.git
     cd autonomous_mobile_robot
     ```
-
-4. Build citysim
-    ```bash
-    cd citysim
-    mkdir build
-    cd build
-    cmake ..
-    make install
+4. (Optional if you want tu use PSPNet, FCHardNet are already included) Download Semantic Segmentation pretrained models for PSPNet from the following link: [Google Drive](https://drive.google.com/drive/folders/1pwOLNTVaKQVt4uSUl7ynOKvLA0_Qk4Rc). This is the required folder structure for these models:
+    ```
+    autonomous_mobile_robot
+    |   ...
+    └───pretrained_models
+        |   ...
+        └───exp
+            └───ade20k
+            |   |   ...
+            |
+            └───cityscapes
+            |   |   ...
+            |
+            └───voc2012
+                |   ...
     ```
 
-5. Build Dockerfile.
+4. Build Dockerfile.
     ```bash
     docker build . -t amr
     ```
-
-6. Build ros workspace
-    ```bash
-    cd dev_ws
-    colcon build
-    ```
 ## Run
+1. Run docker container using provided script
+    ```bash
+    source run_docker.sh
+    ```
 
+### Run Simulation
+1. Inside the docker container, run ros2/gazebo simulation using the provided scripts (The first time, it might take a few minutes for gazebo to load all the models)
+    ```bash
+    source run.sh
+    ```
 ### Test Semantic Segmentation and calculate perspective transformation matrix
 
 1. Run docker container and jupyterlab
@@ -57,26 +69,7 @@ The simulation is implemented in gazebo and uses [dolly](https://github.com/chap
 
 2. Follow the instructions in the Jupytenotebook located inside the container in: */usr/src/app/dev_ws/src/vision/vision/_calculate_perspective_transform.ipynb*
 
-### Run Simulation
-1. On a new terminal run the simulation:
-    ```bash
-    cd dev_ws
-    . /opt/ros/eloquent/setup.bash 
-    . install/setup.bash
-    . /usr/local/share/citysim/setup.sh
-    export DOMAIN_ID=0
-    ros2 launch dolly_gazebo dolly.launch.py world:=simple_city_orig.world
-    ```
-2. In another terminal, run docker container
-    ```bash
-    cd autonomous_mobile_robot
-    docker run -p 8888:8888 -v `pwd`/dev_ws/src/semantic_segmentation:/usr/src/app/dev_ws/src/semantic_segmentation -it --rm --gpus all amr 
-    ```
-3. Run docker container and then the semantic segmentation node
-    ```bash
-    source run_docker.sh
-    source semantic_segmentation_nav.sh
-    ```
+Additional notebooks are provided in */usr/src/app/dev_ws/src/vision/vision/* to explain some of the concepts used in this work.
     
 <!--
 ## Results

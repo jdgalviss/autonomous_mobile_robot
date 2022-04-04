@@ -9,5 +9,6 @@ docker run -it --rm  \
     -e DISPLAY=$DISPLAY \
     -v $XSOCK:$XSOCK \
     -v $HOME/.Xauthority:/root/.Xauthority \
-    -v `pwd`/dev_ws/src/vision:/usr/src/app/dev_ws/src/vision \
+    -v `pwd`/dev_ws/src:/usr/src/app/dev_ws/src \
+    -v `pwd`/../pretrained_models:/usr/src/app/pretrained_models \
     amr "$@"

@@ -52,7 +52,7 @@ OBJECT_DETECTION:
   model_path_yolo: '/usr/src/app/dev_ws/src/vision/vision/pretrained/yolov5s.pt'
 
 OTHER:
-  debug: true # To be used when displaying intermediate steps with matplotlib in jupyter notebook
+  debug: false # To be used when displaying intermediate steps with matplotlib in jupyter notebook
   original_height: 720
   original_width: 1080
   edge_point_size: 15
