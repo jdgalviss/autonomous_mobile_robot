@@ -45,6 +45,7 @@ Semantic segmentation is strongly based on [PSPNet](https://github.com/hszhao/se
 
 4. Build Dockerfile.
     ```bash
+    cd semantic_nav
     docker build . -t amr
     ```
 ## Run
