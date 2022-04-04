@@ -4,3 +4,6 @@
 [submodule "citysim"]
 	path = citysim
 	url = git@github.com:jdgalviss/citysim.git
+[submodule "dev_ws/src/vision/vision/semseg"]
+	path = dev_ws/src/vision/vision/semseg
+	url = https://github.com/jdgalviss/semseg.git
