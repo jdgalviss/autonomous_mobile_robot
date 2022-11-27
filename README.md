@@ -1,7 +1,7 @@
 # autonomous_mobile_robot
 **Note:** Old Implementation using DWAin citysim: [dwa](https://github.com/jdgalviss/autonomous_mobile_robot/tree/dwa)
 
-<!--
+
 ![01_results](https://user-images.githubusercontent.com/18732666/147863893-07543d57-ec36-4b0c-b735-990d4cc95fda.png)
 
 <!--
