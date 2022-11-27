@@ -1,13 +1,16 @@
 # autonomous_mobile_robot
 **Note:** Old Implementation using DWAin citysim: [dwa](https://github.com/jdgalviss/autonomous_mobile_robot/tree/dwa)
 
+<!--
+![01_results](https://user-images.githubusercontent.com/18732666/147863893-07543d57-ec36-4b0c-b735-990d4cc95fda.png)
+
+<!--
 ![left0416](https://user-images.githubusercontent.com/18732666/150397275-75c7059a-a19b-430e-86b7-f61506884739.jpg)
+-->
 
 https://user-images.githubusercontent.com/18732666/147863969-dd330be5-d9da-4aa1-972c-b5d6edf766a6.mp4
 
-<!--
-![01_results](https://user-images.githubusercontent.com/18732666/147863893-07543d57-ec36-4b0c-b735-990d4cc95fda.png)
--->
+
 This is the implementation of an navigation system for an autonomous mobile robot using only front-facing RGB Camera. The proposed approach uses **semantic segmentation** to detect drivable areas in an image and object detection to emphasize objects of interest such as people and cars using yolov5. These detections are then transformed into a Bird's-Eye view semantic map that also contains spatial information about the distance towards the edges of the drivable area and the objects around the robot. Then, a **multi-objective cost function** is computed from the semantic map and used to generate a safe path for the robot to follow. 
 
 The code was tested on both simulation and a real robot (clearpath robotics' jackal).
