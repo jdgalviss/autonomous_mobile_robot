@@ -1,5 +1,6 @@
 # autonomous_mobile_robot
-**Note:** Old Implementation using DWAin citysim: [dwa](https://github.com/jdgalviss/autonomous_mobile_robot/tree/dwa)
+[[`Paper`](https://ieeexplore.ieee.org/abstract/document/10242482)]
+[[`BibTex`](#citation)]
 
 
 ![01_results](https://user-images.githubusercontent.com/18732666/147863893-07543d57-ec36-4b0c-b735-990d4cc95fda.png)
@@ -108,7 +109,9 @@ export DOMAIN_ID=0
 
 ros2 run semantic_segmentation semantic_segmentation  -->
 
-# Citation
+**Note:** Old Implementation using DWAin citysim: [dwa](https://github.com/jdgalviss/autonomous_mobile_robot/tree/dwa)
+
+# <a name="citation"></a> Citation
 
 If you find this project useful for your research, please consider citing:
 
