@@ -107,3 +107,18 @@ colcon build
 export DOMAIN_ID=0
 
 ros2 run semantic_segmentation semantic_segmentation  -->
+
+# Citation
+
+If you find this project useful for your research, please consider citing:
+
+```bibtex
+@inproceedings{galvis2023autonomous,
+  title={An Autonomous Navigation Approach based on Bird’s-Eye View Semantic Maps},
+  author={Galvis, Juan and Pediaditis, Dimitrios and Almazrouei, Khawla Saif and Aspragathos, Nikos},
+  booktitle={2023 27th International Conference on Methods and Models in Automation and Robotics (MMAR)},
+  pages={81--86},
+  year={2023},
+  organization={IEEE}
+}
+```
